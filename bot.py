@@ -104,17 +104,17 @@ if poster_path:
 
         keyboard.append(row)
 
-if poster_url:
-    await update.message.reply_photo(
-        photo=poster_url,
-        caption=f"🎬 {title}\n⭐ {rating:.1f}/10\n📅 {year}\n\nChoose subtitle language:",
-        reply_markup=InlineKeyboardMarkup(keyboard),
-    )
-else:
-    await update.message.reply_text(
-        f"🎬 {title}\n⭐ {rating:.1f}/10\n📅 {year}\n\nChoose subtitle language:",
-        reply_markup=InlineKeyboardMarkup(keyboard),
-    )
+    if poster_url:
+        await update.message.reply_photo(
+            photo=poster_url,
+            caption=f"🎬 {title}\n⭐ {rating:.1f}/10\n📅 {year}\n\nChoose subtitle language:",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+        )
+    else:
+        await update.message.reply_text(
+            f"🎬 {title}\n⭐ {rating:.1f}/10\n📅 {year}\n\nChoose subtitle language:",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+        )
     
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
