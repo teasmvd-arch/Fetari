@@ -25,6 +25,7 @@ def search_subtitles(imdb_id):
         return []
 
     subtitles = []
+    seen_languages = set()
 
     for item in response.json().get("data", []):
         attributes = item.get("attributes", {})
@@ -33,12 +34,19 @@ def search_subtitles(imdb_id):
         if not files:
             continue
 
-        subtitles.append(
-            {
-                "language": attributes.get("language"),
-                "file_id": files[0]["file_id"],
-            }
-        )
+       language = attributes.get("language")
+
+       if language in seen_languages:
+           continue
+
+       seen_languages.add(language)
+
+       subtitles.append(
+           {
+               "language": language,
+               "file_id": files[0]["file_id"],
+           }
+      )
 
     return subtitles
 
