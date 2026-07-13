@@ -76,7 +76,13 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     title = result.get("title") or result.get("name")
+    rating = result.get("vote_average", 0)
+    poster_path = result.get("poster_path")
+    poster_url = None
 
+if poster_path:
+    poster_url = f"https://image.tmdb.org/t/p/w500{poster_path}"
+   
     keyboard = []
 
     for i in range(0, min(len(subtitles), 20), 2):
@@ -98,11 +104,18 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         keyboard.append(row)
 
-    await update.message.reply_text(
-        f"✅ {title}\n\nChoose subtitle language:",
+if poster_url:
+    await update.message.reply_photo(
+        photo=poster_url,
+        caption=f"🎬 {title}\n⭐ {rating:.1f}/10\n📅 {year}\n\nChoose subtitle language:",
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
-
+else:
+    await update.message.reply_text(
+        f"🎬 {title}\n⭐ {rating:.1f}/10\n📅 {year}\n\nChoose subtitle language:",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
+    
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
