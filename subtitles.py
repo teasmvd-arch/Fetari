@@ -1,11 +1,64 @@
 import requests
+import re
 
 from config import TMDB_API_KEY
 
 BASE_URL = "https://api.themoviedb.org/3"
 
 
+def clean_query(query):
+    # . ወደ space ቀይር
+    query = query.replace(".", " ")
+
+    # S01E01, S1E1, S01 E01 አስወግድ
+    query = re.sub(
+        r"\bS\d{1,2}\s*E\d{1,2}\b",
+        "",
+        query,
+        flags=re.IGNORECASE,
+    )
+
+    # Season 1 Episode 1 አስወግድ
+    query = re.sub(
+        r"\bSeason\s*\d+\s*Episode\s*\d+\b",
+        "",
+        query,
+        flags=re.IGNORECASE,
+    )
+
+    # Video quality አስወግድ
+    query = re.sub(
+        r"\b(2160p|1080p|720p|480p)\b",
+        "",
+        query,
+        flags=re.IGNORECASE,
+    )
+
+    # Release tags አስወግድ
+    query = re.sub(
+        r"\b(WEB[- ]?DL|WEBRip|BluRay|BRRip|HDRip|DVDRip|HDTV|NF|AMZN)\b",
+        "",
+        query,
+        flags=re.IGNORECASE,
+    )
+
+    # Codec አስወግድ
+    query = re.sub(
+        r"\b(x264|x265|H264|H265|HEVC|AAC|DDP5\.1|DD5\.1)\b",
+        "",
+        query,
+        flags=re.IGNORECASE,
+    )
+
+    # ብዙ space አንድ አድርግ
+    query = " ".join(query.split())
+
+    return query
+
+
 def search_movie(query):
+    query = clean_query(query)
+
     headers = {
         "Authorization": f"Bearer {TMDB_API_KEY}",
         "accept": "application/json",
