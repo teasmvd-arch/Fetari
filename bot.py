@@ -146,43 +146,46 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if query.data.startswith("lang_"):
 
-    language = query.data.replace("lang_", "")
+        language = query.data.replace("lang_", "")
 
-    subtitles = USER_RESULTS.get(update.effective_user.id, [])
+        subtitles = USER_RESULTS.get(update.effective_user.id, [])
 
-    keyboard = []
+        keyboard = []
 
-    for sub in subtitles:
+        for sub in subtitles:
 
-        if sub["language"] != language:
-            continue
+            if sub["language"] != language:
+                continue
 
-        release = sub.get("release") or "Unknown Release"
+            release = sub.get("release") or "Unknown Release"
 
-        if len(release) > 45:
-            release = release[:45] + "..."
+            if len(release) > 45:
+                release = release[:45] + "..."
+
+            keyboard.append([
+                InlineKeyboardButton(
+                    release,
+                    callback_data=f"download_{sub['file_id']}",
+                )
+            ])
+
+            if len(keyboard) >= 10:
+                break
 
         keyboard.append([
             InlineKeyboardButton(
-                release,
-                callback_data=f"download_{sub['file_id']}",
+                "⬅ Back",
+                callback_data="back_languages",
             )
         ])
 
-        if len(keyboard) >= 10:
-            break
+        await query.edit_message_reply_markup(
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
 
-    keyboard.append([
-        InlineKeyboardButton("⬅ Back", callback_data="back_languages")
-    ])
+        return
 
-    await query.edit_message_reply_markup(
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
-
-    return
-
-file_id = query.data.replace("download_", "")
+    file_id = query.data.replace("download_", "")
 
     await query.edit_message_caption(
         caption="📥 Downloading subtitle..."
@@ -208,7 +211,6 @@ file_id = query.data.replace("download_", "")
         await query.delete_message()
     except Exception:
         pass
-
 
 def main():
     check_config()
