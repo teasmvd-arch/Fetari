@@ -96,24 +96,29 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     keyboard = []
 
-    for i in range(0, min(len(subtitles), 20), 2):
-        row = []
+languages = []
 
-        for j in range(2):
-            if i + j < min(len(subtitles), 20):
-                sub = subtitles[i + j]
+for sub in subtitles:
+    lang = sub["language"]
 
-                row.append(
-                    InlineKeyboardButton(
-                        LANGUAGE_NAMES.get(
-                            sub["language"],
-                            sub["language"],
-                        ),
-                        callback_data=f"download_{sub['file_id']}",
-                    )
+    if lang not in languages:
+        languages.append(lang)
+
+for i in range(0, len(languages), 2):
+    row = []
+
+    for j in range(2):
+        if i + j < len(languages):
+            lang = languages[i + j]
+
+            row.append(
+                InlineKeyboardButton(
+                    LANGUAGE_NAMES.get(lang, lang),
+                    callback_data=f"lang_{lang}",
                 )
+            )
 
-        keyboard.append(row)
+    keyboard.append(row)
 
     caption = (
         f"🎬 {title}\n"
@@ -139,7 +144,45 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    file_id = query.data.replace("download_", "")
+    if query.data.startswith("lang_"):
+
+    language = query.data.replace("lang_", "")
+
+    subtitles = USER_RESULTS.get(update.effective_user.id, [])
+
+    keyboard = []
+
+    for sub in subtitles:
+
+        if sub["language"] != language:
+            continue
+
+        release = sub.get("release") or "Unknown Release"
+
+        if len(release) > 45:
+            release = release[:45] + "..."
+
+        keyboard.append([
+            InlineKeyboardButton(
+                release,
+                callback_data=f"download_{sub['file_id']}",
+            )
+        ])
+
+        if len(keyboard) >= 10:
+            break
+
+    keyboard.append([
+        InlineKeyboardButton("⬅ Back", callback_data="back_languages")
+    ])
+
+    await query.edit_message_reply_markup(
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+    return
+
+file_id = query.data.replace("download_", "")
 
     await query.edit_message_caption(
         caption="📥 Downloading subtitle..."
