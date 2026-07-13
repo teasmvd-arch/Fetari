@@ -4,6 +4,7 @@ from telegram import (
     InlineKeyboardMarkup,
     InputFile,
 )
+
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -14,7 +15,12 @@ from telegram.ext import (
 )
 
 from config import BOT_TOKEN, check_config
-from subtitles import search_movie, get_imdb_id
+
+from subtitles import (
+    search_movie,
+    get_imdb_id,
+)
+
 from opensubtitles import (
     search_subtitles,
     download_subtitle,
@@ -47,11 +53,15 @@ LANGUAGE_NAMES = {
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🎬 Welcome!\n\n"
-        "Send me a movie or TV show name."
+        "Send me a movie or TV show name.\n\n"
+        "Examples:\n"
+        "Breaking Bad S01E01\n"
+        "Avatar\n"
+        "12 Monkeys S02E05"
     )
+    
+    async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-
-async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
     movie_name = update.message.text.strip()
 
     await update.message.reply_text("🔎 Searching...")
@@ -59,7 +69,7 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
     result = search_movie(movie_name)
 
     if not result:
-        await update.message.reply_text("❌ Movie not found.")
+        await update.message.reply_text("❌ Movie or TV Show not found.")
         return
 
     imdb_id = get_imdb_id(
@@ -73,52 +83,56 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     subtitles = search_subtitles(imdb_id)
 
-    USER_RESULTS[update.effective_user.id] = subtitles
-
     if not subtitles:
         await update.message.reply_text("❌ No subtitles found.")
         return
+
+    USER_RESULTS[update.effective_user.id] = subtitles
 
     title = result.get("title") or result.get("name")
     rating = result.get("vote_average", 0)
 
     year = ""
+
     if result.get("release_date"):
         year = result["release_date"][:4]
     elif result.get("first_air_date"):
         year = result["first_air_date"][:4]
 
-    poster_path = result.get("poster_path")
     poster_url = None
 
-    if poster_path:
-        poster_url = f"https://image.tmdb.org/t/p/w500{poster_path}"
+    if result.get("poster_path"):
+        poster_url = (
+            "https://image.tmdb.org/t/p/w500"
+            + result["poster_path"]
+        )
+
+    languages = []
+
+    for sub in subtitles:
+        if sub["language"] not in languages:
+            languages.append(sub["language"])
 
     keyboard = []
 
-languages = []
+    for i in range(0, len(languages), 2):
 
-for sub in subtitles:
-    lang = sub["language"]
+        row = []
 
-    if lang not in languages:
-        languages.append(lang)
+        for j in range(2):
 
-for i in range(0, len(languages), 2):
-    row = []
+            if i + j < len(languages):
 
-    for j in range(2):
-        if i + j < len(languages):
-            lang = languages[i + j]
+                lang = languages[i + j]
 
-            row.append(
-                InlineKeyboardButton(
-                    LANGUAGE_NAMES.get(lang, lang),
-                    callback_data=f"lang_{lang}",
+                row.append(
+                    InlineKeyboardButton(
+                        LANGUAGE_NAMES.get(lang, lang),
+                        callback_data=f"lang_{lang}",
+                    )
                 )
-            )
 
-    keyboard.append(row)
+        keyboard.append(row)
 
     caption = (
         f"🎬 {title}\n"
@@ -128,29 +142,38 @@ for i in range(0, len(languages), 2):
     )
 
     if poster_url:
+
         await update.message.reply_photo(
             photo=poster_url,
             caption=caption,
             reply_markup=InlineKeyboardMarkup(keyboard),
         )
+
     else:
+
         await update.message.reply_text(
-            text=caption,
+            caption,
             reply_markup=InlineKeyboardMarkup(keyboard),
         )
-
-
+        
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     query = update.callback_query
     await query.answer()
 
+    # ---------- LANGUAGE ----------
     if query.data.startswith("lang_"):
 
         language = query.data.replace("lang_", "")
 
-        subtitles = USER_RESULTS.get(update.effective_user.id, [])
+        subtitles = USER_RESULTS.get(
+            update.effective_user.id,
+            [],
+        )
 
         keyboard = []
+
+        count = 0
 
         for sub in subtitles:
 
@@ -159,8 +182,8 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             release = sub.get("release") or "Unknown Release"
 
-            if len(release) > 45:
-                release = release[:45] + "..."
+            if len(release) > 50:
+                release = release[:50] + "..."
 
             keyboard.append([
                 InlineKeyboardButton(
@@ -169,13 +192,15 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
             ])
 
-            if len(keyboard) >= 10:
+            count += 1
+
+            if count == 10:
                 break
 
         keyboard.append([
             InlineKeyboardButton(
                 "⬅ Back",
-                callback_data="back_languages",
+                callback_data="back",
             )
         ])
 
@@ -185,40 +210,56 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         return
 
-    file_id = query.data.replace("download_", "")
+    # ---------- DOWNLOAD ----------
 
-    await query.edit_message_caption(
-        caption="📥 Downloading subtitle..."
-    )
+    if query.data.startswith("download_"):
 
-    subtitle = download_subtitle(file_id)
-
-    if subtitle is None:
-        await query.message.reply_text(
-            "❌ Failed to download subtitle."
+        file_id = query.data.replace(
+            "download_",
+            "",
         )
+
+        await query.edit_message_caption(
+            caption="📥 Downloading subtitle..."
+        )
+
+        subtitle = download_subtitle(file_id)
+
+        if subtitle is None:
+            await query.message.reply_text(
+                "❌ Download failed."
+            )
+            return
+
+        subtitle.name = "subtitle.srt"
+
+        await query.message.reply_document(
+            document=InputFile(subtitle),
+            filename="subtitle.srt",
+            caption="✅ Subtitle downloaded!"
+        )
+
         return
 
-    subtitle.name = "subtitle.srt"
-
-    await query.message.reply_document(
-        document=InputFile(subtitle),
-        filename="subtitle.srt",
-        caption="✅ Subtitle downloaded successfully!"
-    )
-
-    try:
-        await query.delete_message()
-    except Exception:
-        pass
-
 def main():
+
     check_config()
 
     app = Application.builder().token(BOT_TOKEN).build()
 
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(button_callback))
+    app.add_handler(
+        CommandHandler(
+            "start",
+            start,
+        )
+    )
+
+    app.add_handler(
+        CallbackQueryHandler(
+            button_callback,
+        )
+    )
+
     app.add_handler(
         MessageHandler(
             filters.TEXT & ~filters.COMMAND,
