@@ -1,63 +1,56 @@
-import requests
 import re
+import requests
 
 from config import TMDB_API_KEY
 
 BASE_URL = "https://api.themoviedb.org/3"
 
 
-def clean_query(query):
-    # . ወደ space ቀይር
-    query = query.replace(".", " ")
+def parse_query(query):
+    """
+    Supports:
+    Breaking Bad
+    Breaking Bad S01E01
+    Breaking.Bad.S01E01
+    Breaking Bad 1x01
+    """
 
-    # S01E01, S1E1, S01 E01 አስወግድ
-    query = re.sub(
-        r"\bS\d{1,2}\s*E\d{1,2}\b",
-        "",
+    season = None
+    episode = None
+
+    match = re.search(
+        r"(.*?)[ ._-]*(?:S(\d+)E(\d+)|(\d+)x(\d+))",
         query,
-        flags=re.IGNORECASE,
+        re.IGNORECASE,
     )
 
-    # Season 1 Episode 1 አስወግድ
-    query = re.sub(
-        r"\bSeason\s*\d+\s*Episode\s*\d+\b",
-        "",
-        query,
-        flags=re.IGNORECASE,
+    if match:
+        title = match.group(1)
+
+        if match.group(2):
+            season = int(match.group(2))
+            episode = int(match.group(3))
+        else:
+            season = int(match.group(4))
+            episode = int(match.group(5))
+
+        title = (
+            title.replace(".", " ")
+            .replace("_", " ")
+            .strip()
+        )
+
+        return title, season, episode
+
+    return (
+        query.replace(".", " ").replace("_", " ").strip(),
+        None,
+        None,
     )
-
-    # Video quality አስወግድ
-    query = re.sub(
-        r"\b(2160p|1080p|720p|480p)\b",
-        "",
-        query,
-        flags=re.IGNORECASE,
-    )
-
-    # Release tags አስወግድ
-    query = re.sub(
-        r"\b(WEB[- ]?DL|WEBRip|BluRay|BRRip|HDRip|DVDRip|HDTV|NF|AMZN)\b",
-        "",
-        query,
-        flags=re.IGNORECASE,
-    )
-
-    # Codec አስወግድ
-    query = re.sub(
-        r"\b(x264|x265|H264|H265|HEVC|AAC|DDP5\.1|DD5\.1)\b",
-        "",
-        query,
-        flags=re.IGNORECASE,
-    )
-
-    # ብዙ space አንድ አድርግ
-    query = " ".join(query.split())
-
-    return query
 
 
 def search_movie(query):
-    query = clean_query(query)
+    title, season, episode = parse_query(query)
 
     headers = {
         "Authorization": f"Bearer {TMDB_API_KEY}",
@@ -68,7 +61,7 @@ def search_movie(query):
         f"{BASE_URL}/search/multi",
         headers=headers,
         params={
-            "query": query,
+            "query": title,
             "include_adult": "false",
             "language": "en-US",
             "page": 1,
@@ -83,19 +76,11 @@ def search_movie(query):
 
     for item in results:
         if item.get("media_type") in ("movie", "tv"):
-            return {
-                "id": item.get("id"),
-                "media_type": item.get("media_type"),
-                "title": item.get("title") or item.get("name"),
-                "release_date": item.get("release_date"),
-                "first_air_date": item.get("first_air_date"),
-                "vote_average": item.get("vote_average"),
-                "poster_path": item.get("poster_path"),
-            }
+            item["season"] = season
+            item["episode"] = episode
+            return item
 
     return None
-
-
 def get_imdb_id(media_type, tmdb_id):
     headers = {
         "Authorization": f"Bearer {TMDB_API_KEY}",
@@ -103,9 +88,9 @@ def get_imdb_id(media_type, tmdb_id):
     }
 
     if media_type == "movie":
-        url = f"{BASE_URL}/movie/{tmdb_id}/external_ids"
+        url = f"{BASE_URL}/movie/{tmdb_id}"
     else:
-        url = f"{BASE_URL}/tv/{tmdb_id}/external_ids"
+        url = f"{BASE_URL}/tv/{tmdb_id}"
 
     response = requests.get(
         url,
@@ -116,4 +101,22 @@ def get_imdb_id(media_type, tmdb_id):
     if response.status_code != 200:
         return None
 
-    return response.json().get("imdb_id")
+    data = response.json()
+
+    year = ""
+
+    if media_type == "movie":
+        if data.get("release_date"):
+            year = data["release_date"][:4]
+    else:
+        if data.get("first_air_date"):
+            year = data["first_air_date"][:4]
+
+    return {
+        "imdb_id": data.get("imdb_id"),
+        "title": data.get("title") or data.get("name"),
+        "year": year,
+        "rating": data.get("vote_average", 0),
+        "poster": data.get("poster_path"),
+    }
+   
