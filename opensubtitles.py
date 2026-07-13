@@ -34,19 +34,19 @@ def search_subtitles(imdb_id):
         if not files:
             continue
 
-       language = attributes.get("language")
+        language = attributes.get("language")
 
-       if language in seen_languages:
-           continue
+        if language in seen_languages:
+            continue
 
-       seen_languages.add(language)
+        seen_languages.add(language)
 
-       subtitles.append(
-           {
-               "language": language,
-               "file_id": files[0]["file_id"],
-           }
-      )
+        subtitles.append(
+            {
+                "language": language,
+                "file_id": files[0]["file_id"],
+            }
+        )
 
     return subtitles
 
