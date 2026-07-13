@@ -77,12 +77,19 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     title = result.get("title") or result.get("name")
     rating = result.get("vote_average", 0)
+
+    year = ""
+    if result.get("release_date"):
+        year = result["release_date"][:4]
+    elif result.get("first_air_date"):
+        year = result["first_air_date"][:4]
+
     poster_path = result.get("poster_path")
     poster_url = None
 
-if poster_path:
-    poster_url = f"https://image.tmdb.org/t/p/w500{poster_path}"
-   
+    if poster_path:
+        poster_url = f"https://image.tmdb.org/t/p/w500{poster_path}"
+
     keyboard = []
 
     for i in range(0, min(len(subtitles), 20), 2):
@@ -98,31 +105,41 @@ if poster_path:
                             sub["language"],
                             sub["language"],
                         ),
-                        callback_data=f'download_{sub["file_id"]}',
+                        callback_data=f"download_{sub['file_id']}",
                     )
                 )
 
         keyboard.append(row)
 
+    caption = (
+        f"🎬 {title}\n"
+        f"⭐ {rating:.1f}/10\n"
+        f"📅 {year}\n\n"
+        f"Choose subtitle language:"
+    )
+
     if poster_url:
         await update.message.reply_photo(
             photo=poster_url,
-            caption=f"🎬 {title}\n⭐ {rating:.1f}/10\n📅 {year}\n\nChoose subtitle language:",
+            caption=caption,
             reply_markup=InlineKeyboardMarkup(keyboard),
         )
     else:
         await update.message.reply_text(
-            f"🎬 {title}\n⭐ {rating:.1f}/10\n📅 {year}\n\nChoose subtitle language:",
+            text=caption,
             reply_markup=InlineKeyboardMarkup(keyboard),
         )
-    
+
+
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
     file_id = query.data.replace("download_", "")
 
-    await query.edit_message_text("📥 Downloading subtitle...")
+    await query.edit_message_caption(
+        caption="📥 Downloading subtitle..."
+    )
 
     subtitle = download_subtitle(file_id)
 
@@ -137,33 +154,32 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.message.reply_document(
         document=InputFile(subtitle),
         filename="subtitle.srt",
-        caption="✅ Subtitle downloaded successfully!",
+        caption="✅ Subtitle downloaded successfully!"
     )
+
+    try:
+        await query.delete_message()
+    except Exception:
+        pass
 
 
 def main():
     check_config()
 
-    app = (
-        Application.builder()
-        .token(BOT_TOKEN)
-        .build()
-    )
+    app = Application.builder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CallbackQueryHandler(button_callback))
     app.add_handler(
         MessageHandler(
             filters.TEXT & ~filters.COMMAND,
             search,
         )
     )
-    app.add_handler(
-        CallbackQueryHandler(button_callback)
-    )
 
-    print("Bot started...")
+    print("Bot is running...")
 
-    app.run_polling(drop_pending_updates=True)
+    app.run_polling()
 
 
 if __name__ == "__main__":
