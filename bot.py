@@ -20,6 +20,8 @@ from opensubtitles import (
     download_subtitle,
 )
 
+USER_RESULTS = {}
+
 LANGUAGE_NAMES = {
     "en": "🇬🇧 English",
     "fr": "🇫🇷 French",
@@ -70,6 +72,8 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     subtitles = search_subtitles(imdb_id)
+
+    USER_RESULTS[update.effective_user.id] = subtitles
 
     if not subtitles:
         await update.message.reply_text("❌ No subtitles found.")
