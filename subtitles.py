@@ -29,18 +29,18 @@ def search_movie(query):
     results = response.json().get("results", [])
 
     for item in results:
-    if item.get("media_type") in ("movie", "tv"):
-        return {
-            "id": item.get("id"),
-            "media_type": item.get("media_type"),
-            "title": item.get("title") or item.get("name"),
-            "release_date": item.get("release_date"),
-            "first_air_date": item.get("first_air_date"),
-            "vote_average": item.get("vote_average"),
-            "poster_path": item.get("poster_path"),
-        }
+        if item.get("media_type") in ("movie", "tv"):
+            return {
+                "id": item.get("id"),
+                "media_type": item.get("media_type"),
+                "title": item.get("title") or item.get("name"),
+                "release_date": item.get("release_date"),
+                "first_air_date": item.get("first_air_date"),
+                "vote_average": item.get("vote_average"),
+                "poster_path": item.get("poster_path"),
+            }
 
-return None
+    return None
 
 
 def get_imdb_id(media_type, tmdb_id):
