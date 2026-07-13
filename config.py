@@ -1,8 +1,9 @@
 import os
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-TMDB_API_KEY = os.getenv("TMDB_API_KEY")
-OPENSUBTITLES_API_KEY = os.getenv("OPENSUBTITLES_API_KEY")
+
+BOT_TOKEN = os.getenv("BOT_TOKEN", "").strip()
+TMDB_API_KEY = os.getenv("TMDB_API_KEY", "").strip()
+OPENSUBTITLES_API_KEY = os.getenv("OPENSUBTITLES_API_KEY", "").strip()
 
 
 def check_config():
