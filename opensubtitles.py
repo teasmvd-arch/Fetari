@@ -29,6 +29,11 @@ def search_subtitles(imdb_id):
 
     for item in response.json().get("data", []):
         attributes = item.get("attributes", {})
+
+        release = attributes.get("release", "")
+        downloads = attributes.get("download_count", 0)
+        ratings = attributes.get("ratings", 0)
+
         files = attributes.get("files", [])
 
         if not files:
@@ -45,8 +50,11 @@ def search_subtitles(imdb_id):
             {
                 "language": language,
                 "file_id": files[0]["file_id"],
+                "release": release,
+                "downloads": downloads,
+                "ratings": ratings,
             }
-        )
+        ) 
 
     return subtitles
 
