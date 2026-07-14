@@ -23,6 +23,8 @@ from subtitles import (
 
 from opensubtitles import (
     search_subtitles,
+    get_languages,
+    get_releases,
     download_subtitle,
 )
 
@@ -81,7 +83,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ IMDb ID not found.")
         return
 
-    subtitles = search_subtitles(imdb_id)
+    season = context.user_data.get("season")
+    episode = context.user_data.get("episode")
+
+    subtitles = search_subtitles(
+      imdb_id,
+      season=season,
+      episode=episode,
+   )
 
     if not subtitles:
         await update.message.reply_text("❌ No subtitles found.")
@@ -107,11 +116,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             + result["poster_path"]
         )
 
-    languages = []
-
-    for sub in subtitles:
-        if sub["language"] not in languages:
-            languages.append(sub["language"])
+    languages = get_languages(subtitles)
 
     keyboard = []
 
@@ -163,53 +168,74 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # ---------- LANGUAGE ----------
     if query.data.startswith("lang_"):
+    language = query.data.replace("lang_", "")
 
-        language = query.data.replace("lang_", "")
+    subtitles = USER_RESULTS[update.effective_user.id]
 
-        subtitles = USER_RESULTS.get(
-            update.effective_user.id,
-            [],
-        )
+    releases = get_releases(subtitles, language)
 
-        keyboard = []
+    keyboard = []
 
-        count = 0
-
-        for sub in subtitles:
-
-            if sub["language"] != language:
-                continue
-
-            release = sub.get("release") or "Unknown Release"
-
-            if len(release) > 50:
-                release = release[:50] + "..."
-
-            keyboard.append([
-                InlineKeyboardButton(
-                    release,
-                    callback_data=f"download_{sub['file_id']}",
-                )
-            ])
-
-            count += 1
-
-            if count == 10:
-                break
-
+    for release in releases:
         keyboard.append([
             InlineKeyboardButton(
-                "⬅ Back",
-                callback_data="back",
+                release["release"][:45],
+                callback_data=f"download_{release['file_id']}",
             )
         ])
 
-        await query.edit_message_reply_markup(
-            reply_markup=InlineKeyboardMarkup(keyboard)
-        )
+    keyboard.append([
+        InlineKeyboardButton("⬅ Back", callback_data="back")
+    ])
 
-        return
+    await query.edit_message_text(
+        f"{LANGUAGE_NAMES.get(language, language)} 
+    Releases",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+    )
 
+    return
+
+    return
+
+# ---------- BACK ----------
+
+if query.data == "back":
+
+    subtitles = USER_RESULTS.get(
+        update.effective_user.id,
+        [],
+    )
+
+    languages = get_languages(subtitles)
+
+    keyboard = []
+
+    for i in range(0, len(languages), 2):
+
+        row = []
+
+        for j in range(2):
+
+            if i + j < len(languages):
+
+                lang = languages[i + j]
+
+                row.append(
+                    InlineKeyboardButton(
+                        LANGUAGE_NAMES.get(lang, lang),
+                        callback_data=f"lang_{lang}",
+                    )
+                )
+
+        keyboard.append(row)
+
+    await query.edit_message_reply_markup(
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+    return
+  
     # ---------- DOWNLOAD ----------
 
     if query.data.startswith("download_"):
@@ -231,15 +257,15 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             return
 
-        subtitle.name = "subtitle.srt"
-
         await query.message.reply_document(
-            document=InputFile(subtitle),
-            filename="subtitle.srt",
-            caption="✅ Subtitle downloaded!"
-        )
+          document=InputFile(
+            subtitle["content"],
+            filename=subtitle["filename"],
+         ),
+         caption="✅ Subtitle downloaded!",
+       )
 
-        return
+       return
 
 def main():
 
