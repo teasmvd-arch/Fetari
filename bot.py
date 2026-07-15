@@ -76,28 +76,28 @@ async def search(
         return
 
     movie = get_imdb_id(
-    result["media_type"],
-    result["id"],
-)
+        result["media_type"],
+        result["id"],
+    )
 
-if not movie or not movie["imdb_id"]:
-    await update.message.reply_text("❌ IMDb ID not found.")
-    return
+    if not movie or not movie["imdb_id"]:
+        await update.message.reply_text("❌ IMDb ID not found.")
+        return
 
-imdb_id = movie["imdb_id"]
+    imdb_id = movie["imdb_id"]
 
-season = result.get("season")
-episode = result.get("episode")
+    season = result.get("season")
+    episode = result.get("episode")
 
-subtitles = search_subtitles(
-    imdb_id,
-    season=season,
-    episode=episode,
-)
+    subtitles = search_subtitles(
+        imdb_id,
+        season=season,
+        episode=episode,
+    )
 
-if not subtitles:
-    await update.message.reply_text("❌ No subtitles found.")
-    return
+    if not subtitles:
+        await update.message.reply_text("❌ No subtitles found.")
+        return
 
     USER_RESULTS[update.effective_user.id] = subtitles
 
