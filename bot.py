@@ -257,17 +257,19 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             return
 
-        subtitle["content"].seek(0)
+                subtitle["content"].seek(0)
 
-await query.message.reply_document(
-    document=InputFile(
-        subtitle["content"],
-        filename=subtitle["filename"],
-    ),
-    caption="✅ Subtitle downloaded!"
-)
+        await query.message.reply_document(
+            document=InputFile(
+                subtitle["content"],
+                filename=subtitle["filename"],
+            ),
+            caption="✅ Subtitle downloaded!"
+        )
 
         return
+
+
 def main():
 
     check_config()
