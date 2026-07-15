@@ -50,7 +50,6 @@ def parse_query(query):
 
 
 def search_movie(query):
-def search_movie(query):
     title, season, episode = parse_query(query)
 
     headers = {
