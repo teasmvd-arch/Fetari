@@ -242,7 +242,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # ---------- DOWNLOAD ----------
-    if query.data.startswith("download_"):
+        if query.data.startswith("download_"):
 
         file_id = query.data.replace(
             "download_",
@@ -257,14 +257,14 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             return
 
-                subtitle["content"].seek(0)
+        subtitle["content"].seek(0)
 
         await query.message.reply_document(
             document=InputFile(
                 subtitle["content"],
                 filename=subtitle["filename"],
             ),
-            caption="✅ Subtitle downloaded!"
+            caption="✅ Subtitle downloaded!",
         )
 
         return
