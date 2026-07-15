@@ -62,9 +62,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "12 Monkeys S02E05"
     )
     
-    async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    movie_name = update.message.text.strip()
+    async def search(update: Update, 
+    context: ContextTypes.DEFAULT_TYPE):
+      movie_name = update.message.text.strip()
 
     await update.message.reply_text("🔎 Searching...")
 
