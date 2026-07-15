@@ -30,26 +30,18 @@ from opensubtitles import (
 
 USER_RESULTS = {}
 
-LANGUAGE_NAMES = {
+ALLOWED_LANGUAGES = {
     "en": "🇬🇧 English",
     "fr": "🇫🇷 French",
     "de": "🇩🇪 German",
     "es": "🇪🇸 Spanish",
     "it": "🇮🇹 Italian",
     "pt": "🇵🇹 Portuguese",
-    "pt-BR": "🇧🇷 Portuguese (Brazil)",
-    "pt-PT": "🇵🇹 Portuguese (Portugal)",
     "ar": "🇸🇦 Arabic",
     "tr": "🇹🇷 Turkish",
-    "ko": "🇰🇷 Korean",
-    "ja": "🇯🇵 Japanese",
-    "ru": "🇷🇺 Russian",
     "pl": "🇵🇱 Polish",
     "nl": "🇳🇱 Dutch",
-    "ro": "🇷🇴 Romanian",
-    "vi": "🇻🇳 Vietnamese",
-    "hi": "🇮🇳 Hindi",
-    "zh-CN": "🇨🇳 Chinese",
+    
 }
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -119,7 +111,11 @@ async def search(
             + result["poster_path"]
         )
 
-    languages = get_languages(subtitles)
+    languages = [
+        lang
+        for lang in get_languages(subtitles)
+        if lang in ALLOWED_LANGUAGES
+   ]
 
     keyboard = []
 
