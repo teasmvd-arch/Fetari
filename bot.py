@@ -75,23 +75,25 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Movie or TV Show not found.")
         return
 
-    imdb_id = get_imdb_id(
-        result["media_type"],
-        result["id"],
-    )
+    movie = get_imdb_id(
+    result["media_type"],
+    result["id"],
+)
 
-    if not imdb_id:
-        await update.message.reply_text("❌ IMDb ID not found.")
-        return
+if not movie or not movie["imdb_id"]:
+    await update.message.reply_text("❌ IMDb ID not found.")
+    return
 
-    season = context.user_data.get("season")
-    episode = context.user_data.get("episode")
+imdb_id = movie["imdb_id"]
 
-    subtitles = search_subtitles(
-      imdb_id,
-      season=season,
-      episode=episode,
-   )
+    season = result.get("season")
+    episode = result.get("episode")
+
+subtitles = search_subtitles(
+    imdb_id,
+    season=season,
+    episode=episode,
+)
 
     if not subtitles:
         await update.message.reply_text("❌ No subtitles found.")
@@ -255,13 +257,15 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             return
 
-        await query.message.reply_document(
-            document=InputFile(
-                subtitle["content"],
-                filename=subtitle["filename"],
-            ),
-            caption="✅ Subtitle downloaded!",
-        )
+        subtitle["content"].seek(0)
+
+await query.message.reply_document(
+    document=InputFile(
+        subtitle["content"],
+        filename=subtitle["filename"],
+    ),
+    caption="✅ Subtitle downloaded!"
+)
 
         return
 def main():
