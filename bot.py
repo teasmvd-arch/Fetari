@@ -61,8 +61,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Avatar\n"
         "12 Monkeys S02E05"
     )
-    
-  async def search(
+
+async def search(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
 ):
