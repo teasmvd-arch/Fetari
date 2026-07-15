@@ -241,28 +241,28 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         return
 
-    # ---------- DOWNLOAD ----------
+        # ---------- DOWNLOAD ----------
         if query.data.startswith("download_"):
 
-        file_id = query.data.replace(
-            "download_",
-            "",
-        )
+            file_id = query.data.replace(
+                "download_",
+                "",
+            )
 
-        subtitle = download_subtitle(file_id)
+            subtitle = download_subtitle(file_id)
 
-        if subtitle is None:
-            await query.message.reply_text(
-                "❌ Download failed."
+            if subtitle is None:
+                await query.message.reply_text(
+                    "❌ Download failed."
             )
             return
 
-        subtitle["content"].seek(0)
+            subtitle["content"].seek(0)
 
-        await query.message.reply_document(
-            document=InputFile(
-                subtitle["content"],
-                filename=subtitle["filename"],
+            await query.message.reply_document(
+                document=InputFile(
+                    subtitle["content"],
+                    filename=subtitle["filename"],
             ),
             caption="✅ Subtitle downloaded!",
         )
