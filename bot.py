@@ -198,8 +198,8 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         ])
 
-        await query.edit_message_text(
-            text=f"{LANGUAGE_NAMES.get(language, language)} Releases",
+        await query.edit_message_caption(
+            caption=f"{LANGUAGE_NAMES.get(language, language)} Releases",
             reply_markup=InlineKeyboardMarkup(keyboard),
         )
 
