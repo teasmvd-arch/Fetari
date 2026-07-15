@@ -30,7 +30,7 @@ from opensubtitles import (
 
 USER_RESULTS = {}
 
-ALLOWED_LANGUAGES = {
+LANGUAGE_NAMES = {
     "en": "🇬🇧 English",
     "fr": "🇫🇷 French",
     "de": "🇩🇪 German",
@@ -114,7 +114,7 @@ async def search(
     languages = [
         lang
         for lang in get_languages(subtitles)
-        if lang in ALLOWED_LANGUAGES
+        if lang in LANGUAGE_NAMES
    ]
 
     keyboard = []
@@ -209,7 +209,11 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [],
         )
 
-        languages = get_languages(subtitles)
+        languages = [
+            lang
+            for lang in get_languages(subtitles)
+            if lang in LANGUAGE_NAMES
+       ]
 
         keyboard = []
 
