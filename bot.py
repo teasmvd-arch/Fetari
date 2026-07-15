@@ -76,7 +76,6 @@ async def search(
         return
 
     movie = get_imdb_id(
-    movie = get_imdb_id(
     result["media_type"],
     result["id"],
 )
