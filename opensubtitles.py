@@ -42,8 +42,8 @@ def search_subtitles(imdb_id, season=None, episode=None):
             languages.append(lang)
 
     return sorted(languages)
-   
-    def get_releases(subtitles, language):
+
+def get_releases(subtitles, language):
     releases = []
 
     for sub in subtitles:
@@ -68,8 +68,8 @@ def search_subtitles(imdb_id, season=None, episode=None):
         })
 
     return releases[:10]
-   
-    def download_subtitle(file_id):
+
+def download_subtitle(file_id):
     response = requests.post(
         f"{BASE_URL}/download",
         headers=HEADERS,
