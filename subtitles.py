@@ -57,7 +57,7 @@ def search_movie(query):
         "accept": "application/json",
     }
 
-    response = requests.get(
+response = requests.get(
     f"{BASE_URL}/search/multi",
     headers=headers,
     params={
