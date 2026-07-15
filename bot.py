@@ -168,83 +168,82 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # ---------- LANGUAGE ----------
     if query.data.startswith("lang_"):
-    language = query.data.replace("lang_", "")
 
-    subtitles = USER_RESULTS[update.effective_user.id]
+        language = query.data.replace("lang_", "")
 
-    releases = get_releases(subtitles, language)
+        subtitles = USER_RESULTS.get(
+            update.effective_user.id,
+            [],
+        )
 
-    keyboard = []
+        releases = get_releases(subtitles, language)
 
-    for release in releases:
+        keyboard = []
+
+        for release in releases:
+            keyboard.append([
+                InlineKeyboardButton(
+                    release["release"][:45],
+                    callback_data=f"download_{release['file_id']}",
+                )
+            ])
+
         keyboard.append([
             InlineKeyboardButton(
-                release["release"][:45],
-                callback_data=f"download_{release['file_id']}",
+                "⬅ Back",
+                callback_data="back",
             )
         ])
 
-    keyboard.append([
-        InlineKeyboardButton("⬅ Back", callback_data="back")
-    ])
+        await query.edit_message_text(
+            text=f"{LANGUAGE_NAMES.get(language, language)} Releases",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+        )
 
-    await query.edit_message_text(
-    text=f"{LANGUAGE_NAMES.get(language, language)} Releases",
-    reply_markup=InlineKeyboardMarkup(keyboard),
-),
-    )
+        return
 
-    return
+    # ---------- BACK ----------
+    if query.data == "back":
 
-# ---------- BACK ----------
+        subtitles = USER_RESULTS.get(
+            update.effective_user.id,
+            [],
+        )
 
-if query.data == "back":
+        languages = get_languages(subtitles)
 
-    subtitles = USER_RESULTS.get(
-        update.effective_user.id,
-        [],
-    )
+        keyboard = []
 
-    languages = get_languages(subtitles)
+        for i in range(0, len(languages), 2):
 
-    keyboard = []
+            row = []
 
-    for i in range(0, len(languages), 2):
+            for j in range(2):
+                if i + j < len(languages):
 
-        row = []
+                    lang = languages[i + j]
 
-        for j in range(2):
-
-            if i + j < len(languages):
-
-                lang = languages[i + j]
-
-                row.append(
-                    InlineKeyboardButton(
-                        LANGUAGE_NAMES.get(lang, lang),
-                        callback_data=f"lang_{lang}",
+                    row.append(
+                        InlineKeyboardButton(
+                            LANGUAGE_NAMES.get(lang, lang),
+                            callback_data=f"lang_{lang}",
+                        )
                     )
-                )
 
-        keyboard.append(row)
+            keyboard.append(row)
 
-    await query.edit_message_reply_markup(
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+        await query.edit_message_reply_markup(
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
 
-    return
-  
+        return
+
     # ---------- DOWNLOAD ----------
-
     if query.data.startswith("download_"):
 
         file_id = query.data.replace(
             "download_",
             "",
-        )
-
-        await query.edit_message_caption(
-            caption="📥 Downloading subtitle..."
         )
 
         subtitle = download_subtitle(file_id)
@@ -256,15 +255,14 @@ if query.data == "back":
             return
 
         await query.message.reply_document(
-          document=InputFile(
-            subtitle["content"],
-            filename=subtitle["filename"],
-         ),
-         caption="✅ Subtitle downloaded!",
-       )
+            document=InputFile(
+                subtitle["content"],
+                filename=subtitle["filename"],
+            ),
+            caption="✅ Subtitle downloaded!",
+        )
 
-       return
-
+        return
 def main():
 
     check_config()
