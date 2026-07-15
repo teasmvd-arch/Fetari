@@ -58,19 +58,23 @@ def search_movie(query):
     }
 
     response = requests.get(
-        f"{BASE_URL}/search/multi",
-        headers=headers,
-        params={
-            "query": title,
-            "include_adult": "false",
-            "language": "en-US",
-            "page": 1,
-        },
-        timeout=20,
-    )
+    f"{BASE_URL}/search/multi",
+    headers=headers,
+    params={
+        "query": title,
+        "include_adult": "false",
+        "language": "en-US",
+        "page": 1,
+    },
+    timeout=20,
+)
 
-    if response.status_code != 200:
-        return None
+print("Search title:", title)
+print("Status:", response.status_code)
+print("Response:", response.text)
+
+if response.status_code != 200:
+    return None
 
     results = response.json().get("results", [])
     
