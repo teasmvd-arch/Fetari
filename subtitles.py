@@ -90,7 +90,7 @@ def get_imdb_id(media_type, tmdb_id):
     if media_type == "movie":
         url = f"{BASE_URL}/movie/{tmdb_id}"
     else:
-        url = f"{BASE_URL}/tv/{tmdb_id}"
+        url = f"{BASE_URL}/tv/{tmdb_id}/external_ids"
 
     response = requests.get(
         url,
@@ -103,20 +103,13 @@ def get_imdb_id(media_type, tmdb_id):
 
     data = response.json()
 
-    year = ""
-
-    if media_type == "movie":
-        if data.get("release_date"):
-            year = data["release_date"][:4]
+    if media_type == "tv":
+        imdb_id = data.get("imdb_id")
     else:
-        if data.get("first_air_date"):
-            year = data["first_air_date"][:4]
+        imdb_id = data.get("imdb_id")
 
     return {
-        "imdb_id": data.get("imdb_id"),
+        "imdb_id": imdb_id,
         "title": data.get("title") or data.get("name"),
-        "year": year,
-        "rating": data.get("vote_average", 0),
-        "poster": data.get("poster_path"),
     }
    
