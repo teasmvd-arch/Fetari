@@ -73,11 +73,19 @@ def search_movie(query):
         return None
 
     results = response.json().get("results", [])
-
+    
+    print("QUERY TITLE:", title)
+    print("RESULT COUNT:", len(results))
+   
     for item in results:
-        if item.get("media_type") in ("movie", "tv"):
+        if item.get("media_type") == "tv":
             item["season"] = season
             item["episode"] = episode
+            return item
+
+        if item.get("media_type") == "movie":
+            item["season"] = None
+            item["episode"] = None
             return item
 
     return None
