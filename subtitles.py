@@ -50,6 +50,7 @@ def parse_query(query):
 
 
 def search_movie(query):
+def search_movie(query):
     title, season, episode = parse_query(query)
 
     headers = {
@@ -57,30 +58,30 @@ def search_movie(query):
         "accept": "application/json",
     }
 
-response = requests.get(
-    f"{BASE_URL}/search/multi",
-    headers=headers,
-    params={
-        "query": title,
-        "include_adult": "false",
-        "language": "en-US",
-        "page": 1,
-    },
-    timeout=20,
-)
+    response = requests.get(
+        f"{BASE_URL}/search/multi",
+        headers=headers,
+        params={
+            "query": title,
+            "include_adult": "false",
+            "language": "en-US",
+            "page": 1,
+        },
+        timeout=20,
+    )
 
-print("Search title:", title)
-print("Status:", response.status_code)
-print("Response:", response.text)
+    print("Search title:", title)
+    print("Status:", response.status_code)
 
-if response.status_code != 200:
-    return None
+    if response.status_code != 200:
+        print(response.text)
+        return None
 
     results = response.json().get("results", [])
-    
+
     print("QUERY TITLE:", title)
     print("RESULT COUNT:", len(results))
-   
+
     for item in results:
         if item.get("media_type") == "tv":
             item["season"] = season
