@@ -31,8 +31,8 @@ def search_subtitles(imdb_id, season=None, episode=None):
         return []
 
     return response.json().get("data", [])
-    
-    def get_languages(subtitles):
+
+def get_languages(subtitles):
     languages = []
 
     for sub in subtitles:
@@ -42,7 +42,6 @@ def search_subtitles(imdb_id, season=None, episode=None):
             languages.append(lang)
 
     return sorted(languages)
-
 def get_releases(subtitles, language):
     releases = []
 
