@@ -75,29 +75,35 @@ async def search(
         await update.message.reply_text("❌ Movie or TV Show not found.")
         return
 
+    keyboard = []
 
-    season = result.get("season")
-    episode = result.get("episode")
+    for item in results[:10]:
 
-    opensubs = search_subtitles(
-        imdb_id,
-        season=season,
-        episode=episode,
+        title = item.get("title") or item.get("name")
+
+        if item.get("release_date"):
+            year = item["release_date"][:4]
+
+        elif item.get("first_air_date"):
+            year = item["first_air_date"][:4]
+
+        else:
+            year = "----"
+
+        keyboard.append([
+            InlineKeyboardButton(
+                f"🎬 {title} ({year})",
+                callback_data=f"title_{item['media_type']}_{item['id']}"
+            )
+        ])
+
+
+    await update.message.reply_text(
+        "🎬 Choose a title:",
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
-    subdls = search_subdl(
-        imdb_id,
-        season=season,
-        episode=episode,
-    )
-
-    subtitles = opensubs + subdls
-
-    if not subtitles:
-        await update.message.reply_text(
-            "❌ No subtitles found."
-        )
-        return
+    return
 
     user_id = update.effective_user.id
    
