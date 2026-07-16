@@ -89,10 +89,10 @@ async def search(
     season = result.get("season")
     episode = result.get("episode")
 
-   opensubs = search_subtitles(
-       imdb_id,
-       season=season,
-       episode=episode,
+    opensubs = search_subtitles(
+        imdb_id,
+        season=season,
+        episode=episode,
     )
 
     subdls = search_subdl(
@@ -102,13 +102,15 @@ async def search(
     )
 
     subtitles = opensubs + subdls
+
     if not subtitles:
-        
-        await update.message.reply_text("❌ No subtitles found.")
+        await update.message.reply_text(
+            "❌ No subtitles found."
+        )
         return
 
     user_id = update.effective_user.id
-
+   
     USER_RESULTS[user_id] = subtitles
 
     USER_DOWNLOADS[user_id] = {}
