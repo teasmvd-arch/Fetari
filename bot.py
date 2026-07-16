@@ -75,10 +75,6 @@ async def search(
         await update.message.reply_text("❌ Movie or TV Show not found.")
         return
 
-    movie = get_imdb_id(
-        result["media_type"],
-        result["id"],
-    )
 
     if not movie or not movie["imdb_id"]:
         await update.message.reply_text("❌ IMDb ID not found.")
