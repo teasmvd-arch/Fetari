@@ -22,6 +22,7 @@ from subtitles import (
 )
 
 from opensubtitles import (
+from subdl import search_subdl 
     search_subtitles,
     get_languages,
     get_releases,
@@ -81,10 +82,13 @@ async def search(
     season = result.get("season")
     episode = result.get("episode")
 
-    subtitles = search_subtitles(
-        imdb_id,
-        season=season,
-        episode=episode,
+    opensubs = search_subtitles(imdb_id)
+
+    subdls = search_subdl(imdb_id)
+
+    subtitles = opensubs + subdls
+            season=season,
+            episode=episode,
     )
 
     if not subtitles:
