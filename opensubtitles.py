@@ -46,27 +46,65 @@ def get_releases(subtitles, language):
     releases = []
 
     for sub in subtitles:
-        attributes = sub["attributes"]
+
+        attributes = sub.get(
+            "attributes",
+            {}
+        )
 
         if attributes.get("language") != language:
             continue
 
-        release = attributes.get("release", "Unknown Release")
 
-        files = attributes.get("files", [])
+        release = attributes.get(
+            "release",
+            "Unknown Release"
+        )
+
+
+        files = attributes.get(
+            "files",
+            []
+        )
 
         if not files:
             continue
 
+
         file = files[0]
 
-        releases.append({
+
+        item = {
             "release": release,
-            "file_id": file.get("file_id"),
-            "filename": file.get("file_name", "subtitle.srt"),
-            "download_url": file.get("download_url"),
-            "source": file.get("source", "opensubtitles"),
-        })
+            "filename": file.get(
+                "file_name",
+                "subtitle.srt"
+            ),
+            "source": file.get(
+                "source",
+                "opensubtitles"
+            ),
+        }
+
+
+        # OpenSubtitles
+        if item["source"] == "opensubtitles":
+
+            item["file_id"] = file.get(
+                "file_id"
+            )
+
+
+        # SubDL
+        elif item["source"] == "subdl":
+
+            item["download_url"] = file.get(
+                "download_url"
+            )
+
+
+        releases.append(item)
+
 
     return releases[:10]
 
