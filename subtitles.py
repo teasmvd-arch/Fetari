@@ -74,25 +74,23 @@ def search_movie(query):
 
     if response.status_code != 200:
         print(response.text)
-        return None
+        return []
 
     results = response.json().get("results", [])
 
-    print("QUERY TITLE:", title)
-    print("RESULT COUNT:", len(results))
+    final_results = []
 
     for item in results:
-        if item.get("media_type") == "tv":
-            item["season"] = season
-            item["episode"] = episode
-            return item
 
-        if item.get("media_type") == "movie":
-            item["season"] = None
-            item["episode"] = None
-            return item
+        if item.get("media_type") not in ["movie", "tv"]:
+            continue
 
-    return None
+        item["season"] = season
+        item["episode"] = episode
+
+        final_results.append(item)
+
+    return final_results
 def get_imdb_id(media_type, tmdb_id):
     headers = {
         "Authorization": f"Bearer {TMDB_API_KEY}",
