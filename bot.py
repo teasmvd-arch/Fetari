@@ -270,85 +270,83 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         return
         
-# ---------- DOWNLOAD ----------
-if query.data.startswith("download_"):
+    # ---------- DOWNLOAD ----------
+    if query.data.startswith("download_"):
 
-    user_id = update.effective_user.id
+        user_id = update.effective_user.id
 
-    index = query.data.replace(
-        "download_",
-        ""
-    )
-
-    key = f"{user_id}_{index}"
-
-    release = USER_DOWNLOADS.get(
-        user_id,
-        {}
-    ).get(key)
-
-
-    if not release:
-        await query.message.reply_text(
-            "❌ Subtitle not found."
+        index = query.data.replace(
+            "download_",
+            ""
         )
+
+        key = f"{user_id}_{index}"
+
+        release = USER_DOWNLOADS.get(
+            user_id,
+            {}
+        ).get(key)
+
+
+        if not release:
+            await query.message.reply_text(
+                "❌ Subtitle not found."
+            )
+            return
+
+
+        source = release.get(
+            "source",
+            "opensubtitles"
+        )
+
+
+        # OpenSubtitles download
+        if source == "opensubtitles":
+
+            subtitle = download_subtitle(
+                release["file_id"]
+            )
+
+
+        # SubDL download
+        elif source == "subdl":
+
+            subtitle = download_subdl(
+                release["download_url"]
+            )
+
+
+        else:
+
+            await query.message.reply_text(
+                "❌ Unknown subtitle source."
+            )
+            return
+
+
+
+        if subtitle is None:
+
+            await query.message.reply_text(
+                "❌ Download failed."
+            )
+            return
+
+
+
+        subtitle["content"].seek(0)
+
+
+        await query.message.reply_document(
+            document=InputFile(
+                subtitle["content"],
+                filename=subtitle["filename"],
+            ),
+            caption="✅ Subtitle downloaded!",
+        )
+
         return
-
-
-    source = release.get(
-        "source",
-        "opensubtitles"
-    )
-
-
-    # OpenSubtitles
-    if source == "opensubtitles":
-
-        subtitle = download_subtitle(
-            release["file_id"]
-        )
-
-
-    # SubDL
-    elif source == "subdl":
-
-        subtitle = download_subdl(
-            release["download_url"]
-        )
-
-
-    else:
-
-        await query.message.reply_text(
-            "❌ Unknown subtitle source."
-        )
-        return
-
-
-
-    if subtitle is None:
-
-        await query.message.reply_text(
-            "❌ Download failed."
-        )
-
-        return
-
-
-
-    subtitle["content"].seek(0)
-
-
-    await query.message.reply_document(
-        document=InputFile(
-            subtitle["content"],
-            filename=subtitle["filename"],
-        ),
-        caption="✅ Subtitle downloaded!",
-    )
-
-    return
-
 
 def main():
 
