@@ -62,8 +62,10 @@ def get_releases(subtitles, language):
 
         releases.append({
             "release": release,
-            "file_id": file["file_id"],
+            "file_id": file.get("file_id"),
             "filename": file.get("file_name", "subtitle.srt"),
+            "download_url": file.get("download_url"),
+            "source": file.get("source", "opensubtitles"),
         })
 
     return releases[:10]
