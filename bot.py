@@ -76,12 +76,6 @@ async def search(
         return
 
 
-    if not movie or not movie["imdb_id"]:
-        await update.message.reply_text("❌ IMDb ID not found.")
-        return
-
-    imdb_id = movie["imdb_id"]
-
     season = result.get("season")
     episode = result.get("episode")
 
