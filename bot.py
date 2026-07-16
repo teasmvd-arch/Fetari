@@ -196,12 +196,22 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         movie = USER_TITLES[user_id][index]
        
-        poster = movie.get("poster")
+        poster_path = movie.get("poster_path")
 
-        if poster:
-           await query.message.reply_photo(
-             photo=poster
-           )
+        if poster_path:
+
+        poster = (
+           "https://image.tmdb.org/t/p/w500"
+           + poster_path
+       )
+
+        await query.message.reply_photo(
+            photo=poster,
+            caption=(
+                f"🎬 {movie.get('title') or movie.get('name')}\n"
+                f"⭐ Rating: {movie.get('vote_average', 'N/A')}"
+            )
+        )
    
         media_type = movie["media_type"]
         tmdb_id = movie["id"]
