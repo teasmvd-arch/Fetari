@@ -123,3 +123,5 @@ def get_imdb_id(media_type, tmdb_id):
         "title": data.get("title") or data.get("name"),
     }
    
+if __name__ == "__main__":
+    print(search_movie("Avatar"))
