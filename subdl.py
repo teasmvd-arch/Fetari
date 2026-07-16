@@ -56,20 +56,32 @@ def search_subdl(
                 for f in sub["unpack_files"]:
 
                     subtitles.append({
-                        "source": "subdl",
-                        "language": f["language"].lower(),
-                        "release": f["release_name"],
-                        "download_url": DOWNLOAD_URL + f["url"],
+                        "attributes": {
+                            "language": f["language"].lower(),
+                            "release": f["release_name"],
+                            "files": [{
+                                "file_id": None,
+                                "file_name": f["name"],
+                                "download_url": DOWNLOAD_URL + f["url"],
+                                "source": "subdl",
+                           }],
+                        }
                     })
 
             else:
 
-                subtitles.append({
-                    "source": "subdl",
-                    "language": "unknown",
-                    "release": sub.get("release_name", "Subtitle"),
-                    "download_url": DOWNLOAD_URL + sub["url"],
-                })
+                      subtitles.append({
+                          "attributes": {
+                              "language": "unknown",
+                              "release": sub.get("release_name", "Subtitle"),
+                              "files": [{
+                                  "file_id": None,
+                                  "file_name": sub.get("name", "subtitle.zip"),
+                                  "download_url": DOWNLOAD_URL + sub["url"],
+                                  "source": "subdl",
+                              }],
+                          }
+                       })
 
         return subtitles
 
