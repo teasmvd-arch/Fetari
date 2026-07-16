@@ -193,15 +193,21 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         releases = get_releases(subtitles, language)
 
         keyboard = []
-
+        
         for release in releases:
+
+            if release["source"] == "opensubtitles":
+                callback = f"download_{release['file_id']}"
+            else:
+                callback = release["download_url"]
+
             keyboard.append([
                 InlineKeyboardButton(
                     release["release"][:45],
-                    callback_data=f"download_{release['file_id']}",
-                )
-            ])
-
+                    callback_data=callback,
+           )
+      ])
+        
         keyboard.append([
             InlineKeyboardButton(
                 "⬅ Back",
