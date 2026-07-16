@@ -236,7 +236,9 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
           season=season,
           episode=episode,
         )
-
+       
+        subtitles = opensubs + subdls
+        
         if not subtitles:
 
             await query.message.reply_text(
