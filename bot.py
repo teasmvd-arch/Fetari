@@ -35,6 +35,9 @@ from subdl import (
 
 USER_RESULTS = {}
 
+# store download data for buttons
+USER_DOWNLOADS = {}
+
 LANGUAGE_NAMES = {
     "en": "🇬🇧 English",
     "fr": "🇫🇷 French",
@@ -106,7 +109,11 @@ async def search(
         await update.message.reply_text("❌ No subtitles found.")
         return
 
-    USER_RESULTS[update.effective_user.id] = subtitles
+    user_id = update.effective_user.id
+
+    USER_RESULTS[user_id] = subtitles
+
+    USER_DOWNLOADS[user_id] = {}
 
     title = result.get("title") or result.get("name")
     rating = result.get("vote_average", 0)
@@ -194,19 +201,20 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         keyboard = []
         
-        for release in releases:
+        user_id = update.effective_user.id
 
-            if release["source"] == "opensubtitles":
-                callback = f"download_{release['file_id']}"
-            else:
-                callback = release["download_url"]
+        for index, release in enumerate(releases):
+
+            key = f"{user_id}_{index}"
+
+            USER_DOWNLOADS[user_id][key] = release
 
             keyboard.append([
                 InlineKeyboardButton(
                     release["release"][:45],
-                    callback_data=callback,
-           )
-      ])
+                    callback_data=f"download_{index}",
+                )
+            ])
         
         keyboard.append([
             InlineKeyboardButton(
@@ -265,54 +273,71 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ---------- DOWNLOAD ----------
 if query.data.startswith("download_"):
 
-    key = query.data.replace("download_", "")
+    user_id = update.effective_user.id
 
-    subtitles = USER_RESULTS.get(
-        update.effective_user.id,
-        [],
+    index = query.data.replace(
+        "download_",
+        ""
     )
 
-    selected = None
+    key = f"{user_id}_{index}"
 
-    for sub in subtitles:
+    release = USER_DOWNLOADS.get(
+        user_id,
+        {}
+    ).get(key)
 
-        files = sub["attributes"].get("files", [])
 
-        if not files:
-            continue
-
-        f = files[0]
-
-        # OpenSubtitles
-        if f.get("file_id") and str(f["file_id"]) == key:
-            selected = {
-                "source": "opensubtitles",
-                "file_id": f["file_id"],
-            }
-            break
-
-        # SubDL
-        if f.get("download_url") and f["download_url"] == key:
-            selected = {
-                "source": "subdl",
-                "download_url": f["download_url"],
-            }
-            break
-
-    if selected is None:
-        await query.message.reply_text("❌ Subtitle not found.")
+    if not release:
+        await query.message.reply_text(
+            "❌ Subtitle not found."
+        )
         return
 
-    if selected["source"] == "opensubtitles":
-        subtitle = download_subtitle(selected["file_id"])
+
+    source = release.get(
+        "source",
+        "opensubtitles"
+    )
+
+
+    # OpenSubtitles
+    if source == "opensubtitles":
+
+        subtitle = download_subtitle(
+            release["file_id"]
+        )
+
+
+    # SubDL
+    elif source == "subdl":
+
+        subtitle = download_subdl(
+            release["download_url"]
+        )
+
+
     else:
-        subtitle = download_subdl(selected["download_url"])
+
+        await query.message.reply_text(
+            "❌ Unknown subtitle source."
+        )
+        return
+
+
 
     if subtitle is None:
-        await query.message.reply_text("❌ Download failed.")
+
+        await query.message.reply_text(
+            "❌ Download failed."
+        )
+
         return
 
+
+
     subtitle["content"].seek(0)
+
 
     await query.message.reply_document(
         document=InputFile(
