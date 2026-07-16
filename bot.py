@@ -255,33 +255,68 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
         return
+        
+# ---------- DOWNLOAD ----------
+if query.data.startswith("download_"):
 
-    # ---------- DOWNLOAD ----------
-    if query.data.startswith("download_"):
+    key = query.data.replace("download_", "")
 
-        print("DOWNLOAD BUTTON CLICKED")
+    subtitles = USER_RESULTS.get(
+        update.effective_user.id,
+        [],
+    )
 
-        file_id = query.data.replace("download_", "")
-        print("FILE ID:", file_id)
+    selected = None
 
-        subtitle = download_subtitle(file_id)
-        print("DOWNLOAD RESULT:", subtitle)
+    for sub in subtitles:
 
-        if subtitle is None:
-            await query.message.reply_text("❌ Download failed.")
-            return
+        files = sub["attributes"].get("files", [])
 
-        subtitle["content"].seek(0)
+        if not files:
+            continue
 
-        await query.message.reply_document(
-            document=InputFile(
-                subtitle["content"],
-                filename=subtitle["filename"],
-            ),
-            caption="✅ Subtitle downloaded!",
-        )
+        f = files[0]
 
+        # OpenSubtitles
+        if f.get("file_id") and str(f["file_id"]) == key:
+            selected = {
+                "source": "opensubtitles",
+                "file_id": f["file_id"],
+            }
+            break
+
+        # SubDL
+        if f.get("download_url") and f["download_url"] == key:
+            selected = {
+                "source": "subdl",
+                "download_url": f["download_url"],
+            }
+            break
+
+    if selected is None:
+        await query.message.reply_text("❌ Subtitle not found.")
         return
+
+    if selected["source"] == "opensubtitles":
+        subtitle = download_subtitle(selected["file_id"])
+    else:
+        subtitle = download_subdl(selected["download_url"])
+
+    if subtitle is None:
+        await query.message.reply_text("❌ Download failed.")
+        return
+
+    subtitle["content"].seek(0)
+
+    await query.message.reply_document(
+        document=InputFile(
+            subtitle["content"],
+            filename=subtitle["filename"],
+        ),
+        caption="✅ Subtitle downloaded!",
+    )
+
+    return
 
 
 def main():
