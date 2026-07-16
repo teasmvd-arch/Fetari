@@ -195,7 +195,14 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_id = update.effective_user.id
 
         movie = USER_TITLES[user_id][index]
+       
+        poster = movie.get("poster")
 
+        if poster:
+           await query.message.reply_photo(
+             photo=poster
+           )
+   
         media_type = movie["media_type"]
         tmdb_id = movie["id"]
 
