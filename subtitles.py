@@ -87,7 +87,14 @@ def search_movie(query):
 
         item["season"] = season
         item["episode"] = episode
-
+       
+        item["poster"] = (
+          "https://image.tmdb.org/t/p/w500"
+          + item["poster_path"]
+          if item.get("poster_path")
+          else None
+       )
+       
         final_results.append(item)
 
     return final_results
