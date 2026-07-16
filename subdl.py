@@ -1,34 +1,128 @@
+import io
+import os
+import zipfile
 import requests
+
 from config import SUBDL_API_KEY
 
 
-def search_subdl(imdb_id):
-    url = "https://api.subdl.com/api/v1/subtitles"
+BASE_URL = "https://api.subdl.com/api/v1"
+DOWNLOAD_URL = "https://dl.subdl.com"
 
+
+def search_subdl(
+    imdb_id,
+    season=None,
+    episode=None,
+):
     params = {
         "api_key": SUBDL_API_KEY,
-        "imdb_id": imdb_id
+        "imdb_id": imdb_id,
+        "unpack": 1,
+        "subs_per_page": 30,
     }
 
-    try:
-        response = requests.get(url, params=params, timeout=10)
+    if season is not None:
+        params["season_number"] = season
 
-        if response.status_code != 200:
+    if episode is not None:
+        params["episode_number"] = episode
+        params["type"] = "tv"
+    else:
+        params["type"] = "movie"
+
+    try:
+        r = requests.get(
+            f"{BASE_URL}/subtitles",
+            params=params,
+            timeout=20,
+        )
+
+        if r.status_code != 200:
             return []
 
-        data = response.json()
+        data = r.json()
 
-        results = []
+        if not data.get("status"):
+            return []
+
+        subtitles = []
 
         for sub in data.get("subtitles", []):
-            results.append({
-                "language": sub.get("lang"),
-                "release": sub.get("release_name"),
-                "url": sub.get("url"),
-                "source": "SubDL"
-            })
 
-        return results
+            # unpacked files (best)
+            if sub.get("unpack_files"):
 
-    except Exception:
+                for f in sub["unpack_files"]:
+
+                    subtitles.append({
+                        "source": "subdl",
+                        "language": f["language"].lower(),
+                        "release": f["release_name"],
+                        "download_url": DOWNLOAD_URL + f["url"],
+                    })
+
+            else:
+
+                subtitles.append({
+                    "source": "subdl",
+                    "language": "unknown",
+                    "release": sub.get("release_name", "Subtitle"),
+                    "download_url": DOWNLOAD_URL + sub["url"],
+                })
+
+        return subtitles
+
+    except Exception as e:
+        print("SubDL Error:", e)
         return []
+
+
+def download_subdl(download_url):
+    try:
+
+        r = requests.get(
+            download_url,
+            params={
+                "api_key": SUBDL_API_KEY,
+            },
+            timeout=60,
+        )
+
+        if r.status_code != 200:
+            return None
+
+        # zip file
+        if download_url.endswith(".zip"):
+
+            z = zipfile.ZipFile(
+                io.BytesIO(r.content)
+            )
+
+            for name in z.namelist():
+
+                if name.endswith(
+                    (
+                        ".srt",
+                        ".ass",
+                        ".ssa",
+                        ".sub",
+                    )
+                ):
+
+                    return {
+                        "filename": os.path.basename(name),
+                        "content": io.BytesIO(
+                            z.read(name)
+                        ),
+                    }
+
+        # single subtitle
+        return {
+            "filename": "subtitle.srt",
+            "content": io.BytesIO(r.content),
+        }
+
+    except Exception as e:
+        print("SubDL Download Error:", e)
+        return None
