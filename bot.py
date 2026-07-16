@@ -34,6 +34,7 @@ from subdl import (
 )
 
 USER_RESULTS = {}
+USER_TITLES = {}
 
 # store download data for buttons
 USER_DOWNLOADS = {}
@@ -70,7 +71,10 @@ async def search(
 
     await update.message.reply_text("🔎 Searching...")
     results = search_movie(movie_name)
-
+   
+    user_id = update.effective_user.id
+    USER_TITLES[user_id] = results
+   
     if not results:
         await update.message.reply_text("❌ Movie or TV Show not found.")
         return
@@ -93,7 +97,7 @@ async def search(
         keyboard.append([
             InlineKeyboardButton(
                 f"🎬 {title} ({year})",
-                callback_data=f"title_{item['media_type']}_{item['id']}"
+                callback_data=f"title_{results.index(item)}"
             )
         ])
 
@@ -186,9 +190,17 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ---------- TITLE CLICK ----------
     if query.data.startswith("title_"):
 
-        data = query.data.replace("title_", "")
+        index = int(query.data.replace("title_", ""))
 
-        media_type, tmdb_id = data.split("_")
+        user_id = update.effective_user.id
+
+        movie = USER_TITLES[user_id][index]
+
+        media_type = movie["media_type"]
+        tmdb_id = movie["id"]
+
+        season = movie.get("season")
+        episode = movie.get("episode")
 
 
         movie = get_imdb_id(
@@ -214,16 +226,16 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
         opensubs = search_subtitles(
-            imdb_id
+          imdb_id,
+          season=season,
+          episode=episode,
         )
 
         subdls = search_subdl(
-            imdb_id
+          imdb_id,
+          season=season,
+          episode=episode,
         )
-
-
-        subtitles = opensubs + subdls
-
 
         if not subtitles:
 
