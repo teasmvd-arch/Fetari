@@ -295,17 +295,14 @@ async def button_callback(
         return
 
 
-       # -------- FAVORITE --------
+           # -------- FAVORITE --------
 
     if query.data.startswith("fav_"):
 
         print("FAVORITE CLICKED:", query.data)
 
         index = int(
-            query.data.replace(
-                "fav_",
-                ""
-            )
+            query.data.replace("fav_", "")
         )
 
         user_id = update.effective_user.id
@@ -324,29 +321,28 @@ async def button_callback(
 
 
         saved = add_favorite(
-          user_id,
-          {
-            "id": movie["id"],
-            "title": movie.get("title") or movie.get("name"),
-            "poster": movie.get("poster"),
-            "media_type": movie.get("media_type"),
-        }
-    )
-
-
-    if saved:
-        await query.answer(
-            "❤️ Added to favorites!",
-            show_alert=True
+            user_id,
+            {
+                "id": movie["id"],
+                "title": movie.get("title") or movie.get("name"),
+                "poster": movie.get("poster"),
+                "media_type": movie.get("media_type"),
+            }
         )
 
-    else:
-        await query.answer(
-            "❤️ Already saved!",
-            show_alert=True
-        )
 
-     return
+        if saved:
+            await query.answer(
+                "❤️ Added to favorites!",
+                show_alert=True
+            )
+        else:
+            await query.answer(
+                "❤️ Already saved!",
+                show_alert=True
+            )
+
+        return
     
 
 
