@@ -256,18 +256,18 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ),
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
-       
-  media_type = movie["media_type"]
-  tmdb_id = movie["id"]
-
-  season = movie.get("season")
-  episode = movie.get("episode")
 
 
-        imdb = get_imdb_id(
-          media_type,
-          int(tmdb_id)
-        )
+media_type = movie["media_type"]
+tmdb_id = movie["id"]
+
+season = movie.get("season")
+episode = movie.get("episode")
+
+imdb = get_imdb_id(
+    media_type,
+    int(tmdb_id)
+)
 
 
         if not imdb or not imdb["imdb_id"]:
