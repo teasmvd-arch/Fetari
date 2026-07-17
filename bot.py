@@ -314,10 +314,10 @@ if query.data.startswith("title_"):
     USER_DOWNLOADS[user_id] = {}
 
 
-        languages = [
-        lang
-        for lang in get_languages(subtitles)
-        if lang in LANGUAGE_NAMES
+    languages = [
+    lang
+    for lang in get_languages(subtitles)
+    if lang in LANGUAGE_NAMES
     ]
 
 
