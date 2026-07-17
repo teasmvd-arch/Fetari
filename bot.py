@@ -222,22 +222,24 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         return    
         
-    # ---------- TITLE CLICK ----------
-    if query.data.startswith("title_"):
+# ---------- TITLE CLICK ----------
+if query.data.startswith("title_"):
 
-        index = int(query.data.replace("title_", ""))
+    index = int(query.data.replace("title_", ""))
 
-        user_id = update.effective_user.id
+    user_id = update.effective_user.id
 
-        movie = USER_TITLES[user_id][index]
+    movie = USER_TITLES[user_id][index]
 
-        poster_path = movie.get("poster_path")
+    poster_path = movie.get("poster_path")
+
+    poster = None
 
     if poster_path:
-       poster = (
-        "https://image.tmdb.org/t/p/w500"
-        + poster_path
-    )
+        poster = (
+            "https://image.tmdb.org/t/p/w500"
+            + poster_path
+        )
 
     keyboard = [
         [
@@ -248,14 +250,15 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
     ]
 
-  await query.message.reply_photo(
-    photo=poster,
-    caption=(
-      f"🎬 {movie.get('title') or movie.get('name')}\n"
-      f"⭐ Rating: {movie.get('vote_average', 'N/A')}"
-    ),
-    reply_markup=InlineKeyboardMarkup(keyboard)      )
-  )
+    await query.message.reply_photo(
+        photo=poster,
+        caption=(
+            f"🎬 {movie.get('title') or movie.get('name')}\n"
+            f"⭐ Rating: {movie.get('vote_average', 'N/A')}"
+        ),
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
 
     media_type = movie["media_type"]
     tmdb_id = movie["id"]
@@ -264,22 +267,24 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     episode = movie.get("episode")
 
     imdb = get_imdb_id(
-      media_type,
-      int(tmdb_id)
-   )
+        media_type,
+        int(tmdb_id)
+    )
 
-   if not imdb or not imdb["imdb_id"]:
-        
-      await query.message.reply_text(
-        "❌ IMDb ID not found."
-      )
-      return
 
-     imdb_id = imdb["imdb_id"]
+    if not imdb or not imdb["imdb_id"]:
 
-     await query.edit_message_text(
-       "🔎 Searching subtitles..."
-     )
+        await query.message.reply_text(
+            "❌ IMDb ID not found."
+        )
+        return
+
+
+    imdb_id = imdb["imdb_id"]
+
+    await query.edit_message_text(
+        "🔎 Searching subtitles..."
+    )
 
 
       opensubs = search_subtitles(
