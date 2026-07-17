@@ -298,57 +298,53 @@ async def button_callback(
 
     # -------- FAVORITE --------
 
-    if query.data.startswith("fav_"):
+if query.data.startswith("fav_"):
 
-        print("FAVORITE CLICKED:", query.data)
+    print("FAVORITE CLICKED:", query.data)
 
-        index = int(
-            query.data.replace(
-                "fav_",
-                ""
-            )
+    index = int(
+        query.data.replace(
+            "fav_",
+            ""
         )
+    )
 
-        user_id = update.effective_user.id
+    user_id = update.effective_user.id
 
-        movies = USER_TITLES.get(user_id)
-        user_id = update.effective_user.id
+    movies = USER_TITLES.get(user_id)
 
-
-
-        if not movies:
-            await query.answer(
-                "❌ Please search the movie again.",
-                show_alert=True
-           )
-           return
-
-         movie = movies[index]
-
-          saved = add_favorite(
-            user_id,
-            {
-               "id": movie["id"],
-               "title": movie.get("title") or movie.get("name"),
-               "poster": movie.get("poster"),
-               "media_type": movie.get("media_type"),
-            }
+    if not movies:
+        await query.answer(
+            "❌ Please search the movie again.",
+            show_alert=True
         )
-
-
-        if saved:
-            await query.answer(
-                "❤️ Added to favorites!",
-                show_alert=True
-            )
-
-        else:
-            await query.answer(
-                "Already saved!",
-                show_alert=True
-            )
-
         return
+
+    movie = movies[index]
+
+    saved = add_favorite(
+        user_id,
+        {
+            "id": movie["id"],
+            "title": movie.get("title") or movie.get("name"),
+            "poster": movie.get("poster"),
+            "media_type": movie.get("media_type"),
+        }
+    )
+
+    if saved:
+        await query.answer(
+            "❤️ Added to favorites!",
+            show_alert=True
+        )
+
+    else:
+        await query.answer(
+            "Already saved!",
+            show_alert=True
+        )
+
+    return
     
 
 
