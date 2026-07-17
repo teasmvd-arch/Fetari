@@ -269,33 +269,32 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
       int(tmdb_id)
    )
 
-        if not imdb or not imdb["imdb_id"]:
-
-            await query.message.reply_text(
-                "❌ IMDb ID not found."
-            )
-            return
-
-        imdb_id = imdb["imdb_id"]
-
-        await query.edit_message_text(
-            "🔎 Searching subtitles..."
+     if not imdb or not imdb["imdb_id"]:
+        await query.message.reply_text(
+          "❌ IMDb ID not found."
         )
+        return
+
+     imdb_id = imdb["imdb_id"]
+
+     await query.edit_message_text(
+       "🔎 Searching subtitles..."
+     )
 
 
-        opensubs = search_subtitles(
+      opensubs = search_subtitles(
+        imdb_id,
+        season=season,
+        episode=episode,
+      )
+
+       subdls = search_subdl(
           imdb_id,
           season=season,
           episode=episode,
-        )
-
-        subdls = search_subdl(
-          imdb_id,
-          season=season,
-          episode=episode,
-        )
+       )
        
-        subtitles = opensubs + subdls
+       subtitles = opensubs + subdls
         
         if not subtitles:
 
