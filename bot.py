@@ -269,11 +269,12 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
       int(tmdb_id)
    )
 
-     if not imdb or not imdb["imdb_id"]:
-        await query.message.reply_text(
-          "❌ IMDb ID not found."
-        )
-        return
+   if not imdb or not imdb["imdb_id"]:
+        
+      await query.message.reply_text(
+        "❌ IMDb ID not found."
+      )
+      return
 
      imdb_id = imdb["imdb_id"]
 
