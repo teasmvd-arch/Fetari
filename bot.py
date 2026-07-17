@@ -258,11 +258,11 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-        media_type = movie["media_type"]
-        tmdb_id = movie["id"]
+    media_type = movie["media_type"]
+    tmdb_id = movie["id"]
 
-        season = movie.get("season")
-        episode = movie.get("episode")
+    season = movie.get("season")
+    episode = movie.get("episode")
 
         imdb = get_imdb_id(
             media_type,
