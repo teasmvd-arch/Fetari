@@ -36,6 +36,7 @@ from subdl import (
 from database import (
     init_db,
     add_favorite,
+    get_favorites,
 )
 
 
