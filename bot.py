@@ -212,15 +212,11 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
         if saved:
-            await query.answer(
-                "❤️ Added to favorites!"
-            )
+            await query.answer("❤️ Added to favorites!")
         else:
-            await query.answer(
-                "Already saved!"
-            )
+            await query.answer("Already saved!")
 
-  return    
+        return
 
 # ---------- TITLE CLICK ----------
 if query.data.startswith("title_"):
