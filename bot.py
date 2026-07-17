@@ -314,46 +314,42 @@ if query.data.startswith("title_"):
     USER_DOWNLOADS[user_id] = {}
 
 
-    languages = [
+        languages = [
         lang
         for lang in get_languages(subtitles)
         if lang in LANGUAGE_NAMES
     ]
-    
 
 
-        keyboard = []
+    keyboard = []
 
+    for i in range(0, len(languages), 2):
 
-        for i in range(0, len(languages), 2):
+        row = []
 
-            row = []
+        for j in range(2):
 
+            if i + j < len(languages):
 
-            for j in range(2):
+                lang = languages[i + j]
 
-                if i + j < len(languages):
-
-                    lang = languages[i+j]
-
-                    row.append(
-                        InlineKeyboardButton(
-                            LANGUAGE_NAMES[lang],
-                            callback_data=f"lang_{lang}"
-                        )
+                row.append(
+                    InlineKeyboardButton(
+                        LANGUAGE_NAMES[lang],
+                        callback_data=f"lang_{lang}"
                     )
+                )
+
+        keyboard.append(row)
 
 
-            keyboard.append(row)
+    await query.message.reply_text(
+        "🌍 Choose subtitle language:",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
 
 
-        await query.message.reply_text(
-            "🌍 Choose subtitle language:",
-            reply_markup=InlineKeyboardMarkup(keyboard)
-        )
-
-
-        return  
+    return  
         
 # ---------- TITLE ----------
 if query.data.startswith("title_"):
