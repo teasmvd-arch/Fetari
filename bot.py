@@ -279,49 +279,47 @@ if query.data.startswith("title_"):
         )
         return
 
-
     imdb_id = imdb["imdb_id"]
 
     await query.edit_message_text(
         "🔎 Searching subtitles..."
     )
 
-
-      opensubs = search_subtitles(
+    opensubs = search_subtitles(
         imdb_id,
         season=season,
         episode=episode,
-      )
+    )
 
-       subdls = search_subdl(
-          imdb_id,
-          season=season,
-          episode=episode,
-       )
-       
-       subtitles = opensubs + subdls
-        
-        if not subtitles:
+    subdls = search_subdl(
+        imdb_id,
+        season=season,
+        episode=episode,
+    )
 
-            await query.message.reply_text(
-                "❌ No subtitles found."
-            )
-            return
+    subtitles = opensubs + subdls
 
+    if not subtitles:
 
-        user_id = update.effective_user.id
+        await query.message.reply_text(
+            "❌ No subtitles found."
+        )
+        return
 
 
-        USER_RESULTS[user_id] = subtitles
+    user_id = update.effective_user.id
 
-        USER_DOWNLOADS[user_id] = {}
+    USER_RESULTS[user_id] = subtitles
+
+    USER_DOWNLOADS[user_id] = {}
 
 
-        languages = [
-            lang
-            for lang in get_languages(subtitles)
-            if lang in LANGUAGE_NAMES
-        ]
+    languages = [
+        lang
+        for lang in get_languages(subtitles)
+        if lang in LANGUAGE_NAMES
+    ]
+    
 
 
         keyboard = []
