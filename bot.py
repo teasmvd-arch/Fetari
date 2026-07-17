@@ -286,9 +286,14 @@ async def button_callback(
             if lang in LANGUAGE_NAMES
         ]
 
+       if not languages:
+          await query.message.reply_text(
+              "❌ No supported subtitle languages found."
+          )
+          return
+       
 
         keyboard = []
-
 
         for i in range(0, len(languages), 2):
 
