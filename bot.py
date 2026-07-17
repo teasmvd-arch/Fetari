@@ -355,93 +355,93 @@ if query.data.startswith("title_"):
 
         return  
         
-    # ---------- TITLE ----------
-    if query.data.startswith("title_"):
+# ---------- TITLE ----------
+if query.data.startswith("title_"):
 
-        data = query.data.replace("title_", "")
+    data = query.data.replace("title_", "")
 
-        media_type, tmdb_id = data.split("_")
+    media_type, tmdb_id = data.split("_")
 
-        movie = get_imdb_id(
-            media_type,
-            int(tmdb_id),
-        )
+    imdb = get_imdb_id(
+        media_type,
+        int(tmdb_id),
+    )
 
-        if not imdb or not imdb["imdb_id"]:
-            await query.message.reply_text(
-                "❌ IMDb ID not found."
-            )
-            return
-
-
-        imdb_id = imdb["imdb_id"]
-
-
-        await query.edit_message_text(
-            "🔎 Searching subtitles..."
-        )
-
-
-        opensubs = search_subtitles(
-            imdb_id
-        )
-
-        subdls = search_subdl(
-            imdb_id
-        )
-
-
-        subtitles = opensubs + subdls
-
-
-        if not subtitles:
-            await query.message.reply_text(
-                "❌ No subtitles found."
-            )
-            return
-
-
-        user_id = update.effective_user.id
-
-        USER_RESULTS[user_id] = subtitles
-        USER_DOWNLOADS[user_id] = {}
-
-
-        languages = [
-            lang
-            for lang in get_languages(subtitles)
-            if lang in LANGUAGE_NAMES
-        ]
-
-
-        keyboard = []
-
-        for i in range(0, len(languages), 2):
-
-            row = []
-
-            for j in range(2):
-
-                if i+j < len(languages):
-
-                    lang = languages[i+j]
-
-                    row.append(
-                        InlineKeyboardButton(
-                            LANGUAGE_NAMES[lang],
-                            callback_data=f"lang_{lang}"
-                        )
-                    )
-
-            keyboard.append(row)
-
-
+    if not imdb or not imdb["imdb_id"]:
         await query.message.reply_text(
-            "Choose subtitle language:",
-            reply_markup=InlineKeyboardMarkup(keyboard)
+            "❌ IMDb ID not found."
         )
-
         return
+
+
+    imdb_id = imdb["imdb_id"]
+
+
+    await query.edit_message_text(
+        "🔎 Searching subtitles..."
+    )
+
+
+    opensubs = search_subtitles(
+        imdb_id
+    )
+
+    subdls = search_subdl(
+        imdb_id
+    )
+
+
+    subtitles = opensubs + subdls
+
+
+    if not subtitles:
+        await query.message.reply_text(
+            "❌ No subtitles found."
+        )
+        return
+
+
+    user_id = update.effective_user.id
+
+    USER_RESULTS[user_id] = subtitles
+    USER_DOWNLOADS[user_id] = {}
+
+
+    languages = [
+        lang
+        for lang in get_languages(subtitles)
+        if lang in LANGUAGE_NAMES
+    ]
+
+
+    keyboard = []
+
+    for i in range(0, len(languages), 2):
+
+        row = []
+
+        for j in range(2):
+
+            if i + j < len(languages):
+
+                lang = languages[i+j]
+
+                row.append(
+                    InlineKeyboardButton(
+                        LANGUAGE_NAMES[lang],
+                        callback_data=f"lang_{lang}"
+                    )
+                )
+
+        keyboard.append(row)
+
+
+    await query.message.reply_text(
+        "🌍 Choose subtitle language:",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+    return
         
     # ---------- LANGUAGE ----------
     if query.data.startswith("lang_"):
