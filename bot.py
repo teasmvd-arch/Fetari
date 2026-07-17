@@ -39,6 +39,7 @@ from database import (
     get_favorites,
 )
 
+from tmdb import parse_query
 
 USER_TITLES = {}
 USER_RESULTS = {}
@@ -98,13 +99,19 @@ async def search(
 ):
 
     movie_name = update.message.text.strip()
-
+    
+    movie_name, season, episode = parse_query(movie_name)
+   
     await update.message.reply_text("🔎 Searching...")
 
     results = search_movie(movie_name)
 
     user_id = update.effective_user.id
-
+    
+    for item in results:
+      item["season"] = season
+      item["episode"] = episode
+    
     USER_TITLES[user_id] = results
 
 
