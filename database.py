@@ -19,3 +19,46 @@ def init_db():
 
     conn.commit()
     conn.close()
+
+
+def add_favorite(user_id, movie):
+    conn = sqlite3.connect(DB)
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        SELECT * FROM favorites
+        WHERE user_id=? AND movie_id=?
+        """,
+        (
+            user_id,
+            movie["id"],
+        )
+    )
+
+    exists = cur.fetchone()
+
+    if exists:
+        conn.close()
+        return False
+
+
+    cur.execute(
+        """
+        INSERT INTO favorites
+        (user_id, movie_id, title, poster, media_type)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (
+            user_id,
+            movie["id"],
+            movie["title"],
+            movie.get("poster"),
+            movie.get("media_type"),
+        )
+    )
+
+    conn.commit()
+    conn.close()
+
+    return True
