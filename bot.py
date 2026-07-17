@@ -279,21 +279,24 @@ async def button_callback(
 
         USER_RESULTS[user_id] = subtitles
 
-
         languages = [
             lang
             for lang in get_languages(subtitles)
             if lang in LANGUAGE_NAMES
         ]
 
-       if not languages:
-          await query.message.reply_text(
-              "❌ No supported subtitle languages found."
-          )
-          return
-       
+
+        if not languages:
+
+            await query.message.reply_text(
+                "❌ No supported subtitles found."
+            )
+
+            return
+
 
         keyboard = []
+
 
         for i in range(0, len(languages), 2):
 
@@ -303,7 +306,7 @@ async def button_callback(
 
                 if i + j < len(languages):
 
-                    lang = languages[i+j]
+                    lang = languages[i + j]
 
                     row.append(
                         InlineKeyboardButton(
