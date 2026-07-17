@@ -138,7 +138,6 @@ async def button_callback(
 ):
 
     query = update.callback_query
-    await query.answer()
 
 
     # -------- TITLE --------
@@ -347,7 +346,7 @@ async def button_callback(
             show_alert=True
         )
 
-    return 
+  return 
     
 
 
