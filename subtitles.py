@@ -99,15 +99,13 @@ def search_movie(query):
 
     return final_results
 def get_imdb_id(media_type, tmdb_id):
+
     headers = {
         "Authorization": f"Bearer {TMDB_API_KEY}",
         "accept": "application/json",
     }
 
-    if media_type == "movie":
-        url = f"{BASE_URL}/movie/{tmdb_id}"
-    else:
-        url = f"{BASE_URL}/tv/{tmdb_id}/external_ids"
+    url = f"{BASE_URL}/{media_type}/{tmdb_id}/external_ids"
 
     response = requests.get(
         url,
@@ -120,14 +118,8 @@ def get_imdb_id(media_type, tmdb_id):
 
     data = response.json()
 
-    if media_type == "tv":
-        imdb_id = data.get("imdb_id")
-    else:
-        imdb_id = data.get("imdb_id")
-
     return {
-        "imdb_id": imdb_id,
-        "title": data.get("title") or data.get("name"),
+        "imdb_id": data.get("imdb_id")
     }
    
 if __name__ == "__main__":
