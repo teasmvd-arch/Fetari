@@ -225,19 +225,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ---------- TITLE CLICK ----------
 if query.data.startswith("title_"):
 
-    index = int(query.data.replace("title_", ""))
-
-    user_id = update.effective_user.id
-
     movie = USER_TITLES[user_id][index]
-
-    poster_path = movie.get("poster_path")
-
-    if poster_path:
-        poster = (
-            "https://image.tmdb.org/t/p/w500"
-            + poster_path
-        )
 
     keyboard = [
         [
