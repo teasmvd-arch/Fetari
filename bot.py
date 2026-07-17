@@ -233,8 +233,6 @@ if query.data.startswith("title_"):
 
     poster_path = movie.get("poster_path")
 
-    poster = None
-
     if poster_path:
         poster = (
             "https://image.tmdb.org/t/p/w500"
