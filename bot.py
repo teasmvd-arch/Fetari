@@ -248,15 +248,14 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
     ]
 
-    await query.message.reply_photo(
-        photo=poster,
-        caption=(
-            f"🎬 {movie.get('title') or movie.get('name')}\n"
-            f"⭐ Rating: {movie.get('vote_average', 'N/A')}"
-        ),
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
-
+  await query.message.reply_photo(
+    photo=poster,
+    caption=(
+      f"🎬 {movie.get('title') or movie.get('name')}\n"
+      f"⭐ Rating: {movie.get('vote_average', 'N/A')}"
+    ),
+    reply_markup=InlineKeyboardMarkup(keyboard)      )
+  )
 
     media_type = movie["media_type"]
     tmdb_id = movie["id"]
