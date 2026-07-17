@@ -68,6 +68,33 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "12 Monkeys S02E05"
     )
 
+async def favorites(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+
+    user_id = update.effective_user.id
+
+    movies = get_favorites(user_id)
+
+
+    if not movies:
+
+        await update.message.reply_text(
+            "❤️ Your favorites is empty."
+        )
+
+        return
+
+
+    text = "❤️ Your Favorites:\n\n"
+
+    for movie in movies:
+        text += f"🎬 {movie[0]}\n"
+
+
+    await update.message.reply_text(text)
+
 async def search(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
