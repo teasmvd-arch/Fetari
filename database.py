@@ -62,3 +62,34 @@ def add_favorite(user_id, movie):
     conn.close()
 
     return True
+
+
+def get_favorites(user_id):
+
+    conn = sqlite3.connect(DB)
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        SELECT movie_id, title, poster, media_type
+        FROM favorites
+        WHERE user_id=?
+        """,
+        (user_id,)
+    )
+
+    rows = cur.fetchall()
+
+    conn.close()
+
+    favorites = []
+
+    for row in rows:
+        favorites.append({
+            "id": row[0],
+            "title": row[1],
+            "poster": row[2],
+            "media_type": row[3],
+        })
+
+    return favorites
