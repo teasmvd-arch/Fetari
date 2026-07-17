@@ -222,11 +222,10 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
   return    
 
-# ---------- TITLE CLICK ----------               
+# ---------- TITLE CLICK ----------
 if query.data.startswith("title_"):
 
     index = int(query.data.replace("title_", ""))
-
     user_id = update.effective_user.id
 
     movie = USER_TITLES[user_id][index]
