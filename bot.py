@@ -33,6 +33,11 @@ from subdl import (
     download_subdl,
 )
 
+from database import (
+    init_db,
+    add_favorite,
+)
+
 USER_RESULTS = {}
 USER_TITLES = {}
 
@@ -186,7 +191,37 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     query = update.callback_query
     await query.answer()
-         
+    
+    # ---------- ADD FAVORITE ----------
+    if query.data.startswith("fav_"):
+
+        index = int(query.data.replace("fav_", ""))
+
+        user_id = update.effective_user.id
+
+        movie = USER_TITLES[user_id][index]
+
+        saved = add_favorite(
+            user_id,
+            {
+                "id": movie["id"],
+                "title": movie.get("title") or movie.get("name"),
+                "poster": movie.get("poster_path"),
+                "media_type": movie.get("media_type")
+            }
+        )
+
+        if saved:
+            await query.answer(
+                "❤️ Added to favorites!"
+            )
+        else:
+            await query.answer(
+                "Already saved!"
+            )
+
+        return    
+        
     # ---------- TITLE CLICK ----------
     if query.data.startswith("title_"):
 
@@ -198,20 +233,30 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         poster_path = movie.get("poster_path")
 
-        if poster_path:
-            poster = (
-                "https://image.tmdb.org/t/p/w500"
-                + poster_path
-            )
+    if poster_path:
+       poster = (
+        "https://image.tmdb.org/t/p/w500"
+        + poster_path
+    )
 
-            await query.message.reply_photo(
-                photo=poster,
-                caption=(
-                    f"🎬 {movie.get('title') or movie.get('name')}\n"
-                    f"⭐ Rating: {movie.get('vote_average', 'N/A')}"
-                )
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                "❤️ Add Favorite",
+                callback_data=f"fav_{index}"
             )
-   
+        ]
+    ]
+
+    await query.message.reply_photo(
+        photo=poster,
+        caption=(
+            f"🎬 {movie.get('title') or movie.get('name')}\n"
+            f"⭐ Rating: {movie.get('vote_average', 'N/A')}"
+        ),
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+       
         media_type = movie["media_type"]
         tmdb_id = movie["id"]
 
@@ -563,6 +608,8 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main():
 
     check_config()
+
+    init_db()
 
     app = Application.builder().token(BOT_TOKEN).build()
 
