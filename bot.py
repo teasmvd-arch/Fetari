@@ -296,7 +296,7 @@ async def button_callback(
         return
 
 
-    # -------- FAVORITE --------
+   # -------- FAVORITE --------
 
 if query.data.startswith("fav_"):
 
@@ -320,7 +320,9 @@ if query.data.startswith("fav_"):
         )
         return
 
+
     movie = movies[index]
+
 
     saved = add_favorite(
         user_id,
@@ -332,6 +334,7 @@ if query.data.startswith("fav_"):
         }
     )
 
+
     if saved:
         await query.answer(
             "❤️ Added to favorites!",
@@ -340,11 +343,11 @@ if query.data.startswith("fav_"):
 
     else:
         await query.answer(
-            "Already saved!",
+            "❤️ Already saved!",
             show_alert=True
         )
 
-    return
+    return 
     
 
 
