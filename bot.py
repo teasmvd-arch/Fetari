@@ -220,12 +220,27 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "Already saved!"
             )
 
-        return    
-        
+                return    
+
 # ---------- TITLE CLICK ----------
 if query.data.startswith("title_"):
 
+    index = int(query.data.replace("title_", ""))
+
+    user_id = update.effective_user.id
+
     movie = USER_TITLES[user_id][index]
+
+    poster_path = movie.get("poster_path")
+
+    if poster_path:
+        poster = (
+            "https://image.tmdb.org/t/p/w500"
+            + poster_path
+        )
+    else:
+        poster = "https://via.placeholder.com/500x750"
+
 
     keyboard = [
         [
@@ -236,11 +251,13 @@ if query.data.startswith("title_"):
         ]
     ]
 
+
     await query.message.reply_photo(
         photo=poster,
         caption=(
             f"🎬 {movie.get('title') or movie.get('name')}\n"
-            f"⭐ Rating: {movie.get('vote_average', 'N/A')}"
+            f"⭐ Rating: {movie.get('vote_average', 'N/A')}\n"
+            f"📅 Year: {movie.get('release_date', movie.get('first_air_date', 'N/A'))[:4]}"
         ),
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
@@ -252,38 +269,45 @@ if query.data.startswith("title_"):
     season = movie.get("season")
     episode = movie.get("episode")
 
+
     imdb = get_imdb_id(
         media_type,
         int(tmdb_id)
     )
 
 
-    if not imdb or not imdb["imdb_id"]:
+    if not imdb or not imdb.get("imdb_id"):
 
         await query.message.reply_text(
             "❌ IMDb ID not found."
         )
         return
 
+
     imdb_id = imdb["imdb_id"]
 
-    await query.edit_message_text(
+
+    await query.message.reply_text(
         "🔎 Searching subtitles..."
     )
+
 
     opensubs = search_subtitles(
         imdb_id,
         season=season,
-        episode=episode,
+        episode=episode
     )
+
 
     subdls = search_subdl(
         imdb_id,
         season=season,
-        episode=episode,
+        episode=episode
     )
 
+
     subtitles = opensubs + subdls
+
 
     if not subtitles:
 
@@ -293,21 +317,20 @@ if query.data.startswith("title_"):
         return
 
 
-    user_id = update.effective_user.id
-
     USER_RESULTS[user_id] = subtitles
 
     USER_DOWNLOADS[user_id] = {}
 
 
     languages = [
-    lang
-    for lang in get_languages(subtitles)
-    if lang in LANGUAGE_NAMES
+        lang
+        for lang in get_languages(subtitles)
+        if lang in LANGUAGE_NAMES
     ]
 
 
     keyboard = []
+
 
     for i in range(0, len(languages), 2):
 
@@ -317,7 +340,7 @@ if query.data.startswith("title_"):
 
             if i + j < len(languages):
 
-                lang = languages[i + j]
+                lang = languages[i+j]
 
                 row.append(
                     InlineKeyboardButton(
@@ -335,7 +358,7 @@ if query.data.startswith("title_"):
     )
 
 
-    return  
+    return
         
 # ---------- TITLE ----------
 if query.data.startswith("title_"):
