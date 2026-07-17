@@ -38,11 +38,11 @@ from database import (
     add_favorite,
 )
 
-USER_RESULTS = {}
-USER_TITLES = {}
 
-# store download data for buttons
+USER_TITLES = {}
+USER_RESULTS = {}
 USER_DOWNLOADS = {}
+
 
 LANGUAGE_NAMES = {
     "en": "🇬🇧 English",
@@ -55,7 +55,6 @@ LANGUAGE_NAMES = {
     "tr": "🇹🇷 Turkish",
     "pl": "🇵🇱 Polish",
     "nl": "🇳🇱 Dutch",
-    
 }
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
