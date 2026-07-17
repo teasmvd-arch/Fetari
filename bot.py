@@ -220,9 +220,9 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "Already saved!"
             )
 
-                return    
+ return    
 
-# ---------- TITLE CLICK ----------
+# ---------- TITLE CLICK ----------               
 if query.data.startswith("title_"):
 
     index = int(query.data.replace("title_", ""))
