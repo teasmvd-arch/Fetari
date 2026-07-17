@@ -311,15 +311,27 @@ async def button_callback(
 
         user_id = update.effective_user.id
 
-        movie = USER_TITLES[user_id][index]
+        movies = USER_TITLES.get(user_id)
+        user_id = update.effective_user.id
 
-        saved = add_favorite(
+
+
+        if not movies:
+            await query.answer(
+                "❌ Please search the movie again.",
+                show_alert=True
+           )
+           return
+
+         movie = movies[index]
+
+          saved = add_favorite(
             user_id,
             {
-                "id": movie["id"],
-                "title": movie.get("title") or movie.get("name"),
-                "poster": movie.get("poster"),
-                "media_type": movie.get("media_type"),
+               "id": movie["id"],
+               "title": movie.get("title") or movie.get("name"),
+               "poster": movie.get("poster"),
+               "media_type": movie.get("media_type"),
             }
         )
 
