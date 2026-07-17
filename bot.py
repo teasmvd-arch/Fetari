@@ -258,17 +258,16 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-media_type = movie["media_type"]
-tmdb_id = movie["id"]
+        media_type = movie["media_type"]
+        tmdb_id = movie["id"]
 
-season = movie.get("season")
-episode = movie.get("episode")
+        season = movie.get("season")
+        episode = movie.get("episode")
 
-imdb = get_imdb_id(
-    media_type,
-    int(tmdb_id)
-)
-
+        imdb = get_imdb_id(
+            media_type,
+            int(tmdb_id)
+        )
 
         if not imdb or not imdb["imdb_id"]:
 
@@ -277,9 +276,7 @@ imdb = get_imdb_id(
             )
             return
 
-
         imdb_id = imdb["imdb_id"]
-
 
         await query.edit_message_text(
             "🔎 Searching subtitles..."
