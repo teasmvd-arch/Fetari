@@ -569,6 +569,14 @@ def main():
 
 
     app.add_handler(
+        CommandHandler(
+            "favorites",
+            favorites
+        )
+    )
+
+
+    app.add_handler(
         CallbackQueryHandler(
             button_callback
         )
