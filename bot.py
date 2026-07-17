@@ -570,6 +570,14 @@ def main():
 
 
     app.add_handler(
+        CommandHandler(
+            "favorites",
+            favorites
+        )
+    )
+
+
+    app.add_handler(
         CallbackQueryHandler(
             button_callback
         )
@@ -588,9 +596,3 @@ def main():
 
 
     app.run_polling()
-
-
-
-if __name__ == "__main__":
-
-    main()
