@@ -71,120 +71,66 @@ async def search(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
 ):
+
     movie_name = update.message.text.strip()
 
     await update.message.reply_text("🔎 Searching...")
+
     results = search_movie(movie_name)
-   
+
     user_id = update.effective_user.id
+
     USER_TITLES[user_id] = results
-   
+
+
     if not results:
-        await update.message.reply_text("❌ Movie or TV Show not found.")
+
+        await update.message.reply_text(
+            "❌ Movie or TV Show not found."
+        )
+
         return
+
 
     keyboard = []
 
-    for item in results[:10]:
 
-        title = item.get("title") or item.get("name")
+    for index, item in enumerate(results[:10]):
+
+        title = (
+            item.get("title")
+            or item.get("name")
+            or "Unknown"
+        )
+
 
         if item.get("release_date"):
+
             year = item["release_date"][:4]
 
         elif item.get("first_air_date"):
+
             year = item["first_air_date"][:4]
 
         else:
+
             year = "----"
 
-        keyboard.append([
-            InlineKeyboardButton(
-                f"🎬 {title} ({year})",
-                callback_data=f"title_{results.index(item)}"
-            )
-        ])
+
+        keyboard.append(
+            [
+                InlineKeyboardButton(
+                    f"🎬 {title} ({year})",
+                    callback_data=f"title_{index}",
+                )
+            ]
+        )
 
 
     await update.message.reply_text(
         "🎬 Choose a title:",
-        reply_markup=InlineKeyboardMarkup(keyboard)
+        reply_markup=InlineKeyboardMarkup(keyboard),
     )
-
-    return
-
-    user_id = update.effective_user.id
-   
-    USER_RESULTS[user_id] = subtitles
-
-    USER_DOWNLOADS[user_id] = {}
-
-    title = result.get("title") or result.get("name")
-    rating = result.get("vote_average", 0)
-
-    year = ""
-
-    if result.get("release_date"):
-        year = result["release_date"][:4]
-    elif result.get("first_air_date"):
-        year = result["first_air_date"][:4]
-
-    poster_url = None
-
-    if result.get("poster_path"):
-        poster_url = (
-            "https://image.tmdb.org/t/p/w500"
-            + result["poster_path"]
-        )
-
-    languages = [
-        lang
-        for lang in get_languages(subtitles)
-        if lang in LANGUAGE_NAMES
-   ]
-
-    keyboard = []
-
-    for i in range(0, len(languages), 2):
-
-        row = []
-
-        for j in range(2):
-
-            if i + j < len(languages):
-
-                lang = languages[i + j]
-
-                row.append(
-                    InlineKeyboardButton(
-                        LANGUAGE_NAMES.get(lang, lang),
-                        callback_data=f"lang_{lang}",
-                    )
-                )
-
-        keyboard.append(row)
-
-    caption = (
-        f"🎬 {title}\n"
-        f"⭐ {rating:.1f}/10\n"
-        f"📅 {year}\n\n"
-        f"Choose subtitle language:"
-    )
-
-    if poster_url:
-
-        await update.message.reply_photo(
-            photo=poster_url,
-            caption=caption,
-            reply_markup=InlineKeyboardMarkup(keyboard),
-        )
-
-    else:
-
-        await update.message.reply_text(
-            caption,
-            reply_markup=InlineKeyboardMarkup(keyboard),
-        )
         
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
