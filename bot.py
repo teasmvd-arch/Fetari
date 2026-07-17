@@ -59,13 +59,10 @@ LANGUAGE_NAMES = {
 }
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     await update.message.reply_text(
-        "🎬 Welcome!\n\n"
-        "Send me a movie or TV show name.\n\n"
-        "Examples:\n"
-        "Breaking Bad S01E01\n"
-        "Avatar\n"
-        "12 Monkeys S02E05"
+        "🎬 Welcome to Subtitle Downloader Bot!\n\n"
+        "🚀 Search any movie or TV show and get subtitles instantly"
     )
 
 async def favorites(
