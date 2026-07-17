@@ -264,10 +264,10 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     season = movie.get("season")
     episode = movie.get("episode")
 
-        imdb = get_imdb_id(
-            media_type,
-            int(tmdb_id)
-        )
+    imdb = get_imdb_id(
+      media_type,
+      int(tmdb_id)
+   )
 
         if not imdb or not imdb["imdb_id"]:
 
